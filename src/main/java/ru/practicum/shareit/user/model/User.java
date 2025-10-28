@@ -15,10 +15,10 @@ import ru.practicum.shareit.common.validation.groups.OnPatch;
 public class User {
     Long id;
 
-    @NotBlank(groups = OnCreate.class)
+    @NotBlank(message = "Name cannot be empty", groups = OnCreate.class)
     String name;
 
-    @NotBlank(groups = OnCreate.class)
-    @Email(groups = {OnCreate.class, OnPatch.class})
+    @NotBlank(message = "Email cannot be empty", groups = OnCreate.class)
+    @Email(message = "Invalid email format", groups = {OnCreate.class, OnPatch.class})
     String email;
 }
