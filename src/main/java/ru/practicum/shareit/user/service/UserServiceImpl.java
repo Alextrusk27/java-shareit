@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -8,6 +9,7 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.InMemoryUserRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -17,6 +19,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto create(User user) {
         userStorage.save(user);
+        log.info("User created: {}", user);
         return findById(user.getId());
     }
 
@@ -24,12 +27,14 @@ public class UserServiceImpl implements UserService {
     public UserDto update(User user, long id) {
         throwIfUserNotExists(id);
         userStorage.update(user, id);
+        log.info("User updated: {}", user);
         return findById(id);
     }
 
     @Override
     public void delete(long id) {
         throwIfUserNotExists(id);
+        log.info("User deleted: ID{}", id);
         userStorage.delete(id);
     }
 
@@ -37,6 +42,7 @@ public class UserServiceImpl implements UserService {
     public UserDto findById(long id) {
         User user = userStorage.findById(id).orElseThrow(() ->
                 new NotFoundException("User with ID %d not found".formatted(id)));
+        log.debug("User found: {}", user);
         return UserMapper.mapUserToDto(user);
     }
 
