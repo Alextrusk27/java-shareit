@@ -27,8 +27,9 @@ public class UserServiceImpl implements UserService {
     public UserDto update(User user, long id) {
         throwIfUserNotExists(id);
         userStorage.update(user, id);
-        log.info("User updated: {}", user);
-        return findById(id);
+        UserDto userDto = findById(id);
+        log.info("User updated: {}", userDto);
+        return userDto;
     }
 
     @Override
