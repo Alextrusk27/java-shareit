@@ -30,23 +30,21 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public void update(User user, long id) {
-        User existingUser = users.get(id);
-        String newEmail = user.getEmail();
-        String oldEmail = existingUser.getEmail();
+        User existing = users.get(id);
 
-        if (newEmail != null && !newEmail.isEmpty()) {
-            if (!oldEmail.equals(newEmail)) {
-                throwIfEmailExists(newEmail);
-                existingUser.setEmail(newEmail);
-                emails.remove(oldEmail);
-                emails.add(newEmail);
-            }
-        }
-        String name = user.getName();
+        Optional.ofNullable(user.getEmail())
+                .filter(email -> !email.isBlank())
+                .filter(email -> !email.equals(existing.getEmail()))
+                .ifPresent(newEmail -> {
+                    throwIfEmailExists(newEmail);
+                    emails.remove(existing.getEmail());
+                    existing.setEmail(newEmail);
+                    emails.add(newEmail);
+                });
 
-        if (name != null && !name.isEmpty()) {
-            existingUser.setName(name);
-        }
+        Optional.ofNullable(user.getName())
+                .filter(name -> !name.isBlank())
+                .ifPresent(existing::setName);
     }
 
     @Override
