@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.repository.InMemoryUserRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @TestConfiguration
 public class UsersTestConfig {
@@ -55,11 +56,18 @@ public class UsersTestConfig {
         }};
     }
 
+    @Bean(name = "testIdGenerator")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public AtomicLong idGenerator() {
+        return new AtomicLong(2);
+    }
+
     @Bean
     @Primary
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public InMemoryUserRepository userRepository(TreeMap<Long, User> testUsers, HashSet<String> testEmails) {
-        return new InMemoryUserRepository(testUsers, testEmails);
+    public InMemoryUserRepository userRepository(TreeMap<Long, User> testUsers, HashSet<String> testEmails,
+                                                 AtomicLong testIdGenerator) {
+        return new InMemoryUserRepository(testUsers, testEmails, testIdGenerator);
     }
 
     @Bean

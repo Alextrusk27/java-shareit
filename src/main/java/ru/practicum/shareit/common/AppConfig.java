@@ -6,6 +6,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.HashSet;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Configuration
 public class AppConfig {
@@ -18,5 +19,10 @@ public class AppConfig {
     @Bean
     public HashSet<String> emails() {
         return new HashSet<>();
+    }
+
+    @Bean
+    public AtomicLong idGenerator() {
+        return new AtomicLong(1);
     }
 }
