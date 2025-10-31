@@ -4,20 +4,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.TreeMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Configuration
 public class AppConfig {
 
     @Bean
-    public TreeMap<Long, User> users() {
-        return new TreeMap<>();
+    public Map<Long, User> users() {
+        return new HashMap<>();
     }
 
     @Bean
-    public HashSet<String> emails() {
+    public Set<String> emails() {
         return new HashSet<>();
     }
 

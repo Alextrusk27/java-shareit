@@ -42,15 +42,15 @@ public class UsersTestConfig {
 
     @Bean(name = "testUsers")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public TreeMap<Long, User> users(User firstTestUser) {
-        return new TreeMap<>() {{
+    public Map<Long, User> users(User firstTestUser) {
+        return new HashMap<>() {{
             put(1L, firstTestUser);
         }};
     }
 
     @Bean(name = "testEmails")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public HashSet<String> emails(User firstTestUser) {
+    public Set<String> emails(User firstTestUser) {
         return new HashSet<>() {{
             add(firstTestUser.getEmail());
         }};
@@ -65,7 +65,7 @@ public class UsersTestConfig {
     @Bean
     @Primary
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public InMemoryUserRepository userRepository(TreeMap<Long, User> testUsers, HashSet<String> testEmails,
+    public InMemoryUserRepository userRepository(Map<Long, User> testUsers, Set<String> testEmails,
                                                  AtomicLong testIdGenerator) {
         return new InMemoryUserRepository(testUsers, testEmails, testIdGenerator);
     }

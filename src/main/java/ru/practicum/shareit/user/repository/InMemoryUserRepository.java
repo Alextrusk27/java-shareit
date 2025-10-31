@@ -6,9 +6,9 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.DuplicateException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Getter
@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class InMemoryUserRepository implements UserRepository {
 
-    private final TreeMap<Long, User> users;
-    private final HashSet<String> emails;
+    private final Map<Long, User> users;
+    private final Set<String> emails;
     private final AtomicLong idGenerator;
 
     @Override
