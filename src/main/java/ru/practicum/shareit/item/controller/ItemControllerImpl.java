@@ -20,7 +20,7 @@ public class ItemControllerImpl implements ItemController {
 
     @Override
     public ItemDto createItem(CreateItemRequest createRequest, long userId) {
-        log.info("Creating item {} for user id={}", createRequest.name(), userId);
+        log.info("Creating new item {} for user id={}", createRequest.name(), userId);
         ItemDto result = itemService.create(createRequest, userId);
         log.info("Item created: id={} for user id={}", result.id(), userId);
         return result;

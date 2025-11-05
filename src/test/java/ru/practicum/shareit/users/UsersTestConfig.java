@@ -59,7 +59,7 @@ public class UsersTestConfig {
     @Bean(name = "testIdGenerator")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public AtomicLong idGenerator() {
-        return new AtomicLong(2);
+        return new AtomicLong(1);
     }
 
     @Bean

@@ -2,6 +2,7 @@ package ru.practicum.shareit.common;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
@@ -24,7 +25,17 @@ public class AppConfig {
     }
 
     @Bean
-    public AtomicLong idGenerator() {
-        return new AtomicLong(1);
+    public Map<Long, Item> items() {
+        return new HashMap<>();
+    }
+
+    @Bean
+    public AtomicLong userIdGenerator() {
+        return new AtomicLong(0);
+    }
+
+    @Bean
+    public AtomicLong itemIdGenerator() {
+        return new AtomicLong(0);
     }
 }

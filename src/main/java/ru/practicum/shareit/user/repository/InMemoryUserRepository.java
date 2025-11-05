@@ -14,15 +14,14 @@ import java.util.concurrent.atomic.AtomicLong;
 @Repository
 @RequiredArgsConstructor
 public class InMemoryUserRepository implements UserRepository {
-
     private final Map<Long, User> users;
     private final Set<String> emails;
-    private final AtomicLong idGenerator;
+    private final AtomicLong userIdGenerator;
 
     @Override
     public void save(User user) {
         validateEmailExists(user.getEmail());
-        user.setId(idGenerator.getAndIncrement());
+        user.setId(userIdGenerator.incrementAndGet());
         users.put(user.getId(), user);
         emails.add(user.getEmail());
     }

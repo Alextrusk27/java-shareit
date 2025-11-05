@@ -12,16 +12,16 @@ import ru.practicum.shareit.user.model.User;
 public interface UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserDto create(@RequestBody @Validated(OnCreate.class) User user);
+    UserDto createUser(@RequestBody @Validated(OnCreate.class) User user);
 
-    @PatchMapping("/{id}")
-    UserDto update(@RequestBody @Validated(OnPatch.class) User user,
-                   @PathVariable long id);
+    @PatchMapping("/{userId}")
+    UserDto updateUser(@RequestBody @Validated(OnPatch.class) User user,
+                   @PathVariable long userId);
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable long id);
+    void deleteUser(@PathVariable long userId);
 
-    @GetMapping("/{id}")
-    UserDto findById(@PathVariable long id);
+    @GetMapping("/{userId}")
+    UserDto getUserById(@PathVariable long userId);
 }

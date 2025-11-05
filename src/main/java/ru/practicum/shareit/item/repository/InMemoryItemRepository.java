@@ -13,11 +13,11 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class InMemoryItemRepository implements ItemRepository {
     private final Map<Long, Item> items;
-    private final AtomicLong idGenerator;
+    private final AtomicLong itemIdGenerator;
 
     @Override
     public Item save(Item item) {
-        long id = idGenerator.incrementAndGet();
+        long id = itemIdGenerator.incrementAndGet();
         item.setId(id);
         items.put(id, item);
         return item;
