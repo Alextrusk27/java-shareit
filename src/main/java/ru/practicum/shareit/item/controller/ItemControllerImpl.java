@@ -1,0 +1,74 @@
+package ru.practicum.shareit.item.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.CreateItemRequest;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+public class ItemControllerImpl implements ItemController {
+    private final ItemServiceImpl itemService;
+
+    @Override
+    public ItemDto createItem(CreateItemRequest createRequest, long userId) {
+        log.info("Creating item {} for user id={}", createRequest.name(), userId);
+        ItemDto result = itemService.create(createRequest, userId);
+        log.info("Item created: id={} for user id={}", result.id(), userId);
+        return result;
+    }
+
+    @Override
+    public ItemDto updateItem(UpdateItemRequest updateRequest, long itemId, long userId) {
+        log.info("Updating item id={} for user id={}", itemId, userId);
+        ItemDto result = itemService.update(updateRequest, itemId, userId);
+        log.info("Item updated: id={} for user id={}", itemId, userId);
+        return result;
+    }
+
+    @Override
+    public ItemDto getItemById(long itemId) {
+        log.info("Searching item id={}", itemId);
+        ItemDto result = itemService.findById(itemId);
+        log.info("Item id={} was found", itemId);
+        return result;
+    }
+
+    @Override
+    public List<ItemDto> getOwnItems(long userId) {
+        log.info("Searching all own items from user id={}", userId);
+        List<ItemDto> result = itemService.findByOwnerId(userId);
+        log.info("Search result (owm items) by user id={}: {}", userId, getItemsLog(result));
+        return result;
+    }
+
+    @Override
+    public List<ItemDto> searchItems(String text) {
+        log.info("Searching available items by query: {}", text);
+        List<ItemDto> result = itemService.findByQuery(text);
+        log.info("Search result by query: '{}': {}", text, getItemsLog(result));
+        return result;
+    }
+
+    @Override
+    public void deleteItem(long itemId, long userId) {
+        log.info("DELETE request received: delete item id={} from user id={}", itemId, userId);
+    }
+
+    private String getItemsLog(List<ItemDto> result) {
+        if (result.isEmpty()) {
+            return "No items found";
+        }
+        return IntStream.range(0, result.size())
+                .mapToObj(i -> String.format("%d. %s", i + 1, result.get(i)))
+                .collect(Collectors.joining("; "));
+    }
+}

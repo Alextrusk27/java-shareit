@@ -23,7 +23,7 @@ public class ExceptionController {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        log.info("Validation exceptions: {}", errors);
+        log.info("Method args validation exceptions: {}", errors);
         return errors;
     }
 
@@ -38,6 +38,13 @@ public class ExceptionController {
     @ExceptionHandler(NotFoundException.class)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
         log.info("NotFound exception: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ItemOwnershipException.class)
+    public ErrorResponse handleItemOwnershipException(final ItemOwnershipException e) {
+        log.info("ItemOwnershipException exception: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 }

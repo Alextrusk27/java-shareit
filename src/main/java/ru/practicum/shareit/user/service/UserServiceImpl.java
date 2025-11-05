@@ -14,19 +14,19 @@ import ru.practicum.shareit.user.repository.InMemoryUserRepository;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final InMemoryUserRepository userStorage;
+    private final InMemoryUserRepository userRepository;
 
     @Override
     public UserDto create(User user) {
-        userStorage.save(user);
+        userRepository.save(user);
         log.info("User created: {}", user);
         return findById(user.getId());
     }
 
     @Override
     public UserDto update(User user, long id) {
-        throwIfUserNotExists(id);
-        userStorage.update(user, id);
+        userRepository.validateUserExists(id);
+        userRepository.update(user, id);
         UserDto userDto = findById(id);
         log.info("User updated: {}", userDto);
         return userDto;
@@ -34,22 +34,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(long id) {
-        throwIfUserNotExists(id);
+        userRepository.validateUserExists(id);
         log.info("User deleted: ID{}", id);
-        userStorage.delete(id);
+        userRepository.delete(id);
     }
 
     @Override
     public UserDto findById(long id) {
-        User user = userStorage.findById(id).orElseThrow(() ->
+        User user = userRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("User with ID %d not found".formatted(id)));
         log.debug("User found: {}", user);
         return UserMapper.mapUserToDto(user);
-    }
-
-    private void throwIfUserNotExists(long id) {
-        if (!userStorage.getUsers().containsKey(id)) {
-            throw new NotFoundException("User with ID %d not found".formatted(id));
-        }
     }
 }
