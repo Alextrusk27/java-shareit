@@ -92,4 +92,9 @@ public class InMemoryItemRepository implements ItemRepository {
                     .formatted(ownerId, itemId));
         }
     }
+
+    protected void clear() {
+        items.clear();
+        itemIdGenerator.set(0);
+    }
 }

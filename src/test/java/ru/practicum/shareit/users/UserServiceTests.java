@@ -1,16 +1,18 @@
 package ru.practicum.shareit.users;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import ru.practicum.shareit.exceptions.*;
+import ru.practicum.shareit.exceptions.DuplicateException;
+import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.*;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,15 +22,12 @@ import static ru.practicum.shareit.users.UsersTestConfig.*;
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class UserServiceTests {
     @Autowired
-    private UserServiceImpl userService;
+    private UserServiceImplTest userService;
 
-    @Autowired
-    @Qualifier("firstTestUser")
-    private User firstTestUser;
-
-    @Autowired
-    @Qualifier("secondTestUserNoId")
-    private User secondTestUser;
+    @BeforeEach
+    public void setup() {
+        userService.refreshUsersTestData();
+    }
 
     @Nested
     @DisplayName("Find User Operations")
@@ -36,11 +35,11 @@ public class UserServiceTests {
         @Test
         @DisplayName("Should find existing user by ID")
         void findUserById() {
-            UserDto resultUser = userService.findById(TEST_USER_1_ID);
+            UserDto result = userService.findById(TEST_USER_1_ID);
 
-            assertThat(resultUser)
-                    .usingRecursiveComparison()
-                    .isEqualTo(firstTestUser);
+            assertThat(result)
+                    .extracting(UserDto::name, UserDto::email)
+                    .containsExactly(TEST_USER_1_NAME, TEST_USER_1_EMAIL);
         }
 
         @Test
@@ -88,12 +87,11 @@ public class UserServiceTests {
         void updateUserWithAllFields() {
             UpdateUserRequest updateUser = new UpdateUserRequest(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
             userService.update(updateUser, TEST_USER_1_ID);
-            UserDto resultUser = userService.findById(TEST_USER_1_ID);
+            UserDto result = userService.findById(TEST_USER_1_ID);
 
-            assertThat(resultUser)
-                    .usingRecursiveComparison()
-                    .ignoringFields("id")
-                    .isEqualTo(secondTestUser);
+            assertThat(result)
+                    .extracting(UserDto::name, UserDto::email)
+                    .containsExactly(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
         }
 
         @Test
@@ -153,6 +151,17 @@ public class UserServiceTests {
             assertThatThrownBy(() -> userService.delete(nonExistentId))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageMatching("User with ID %d not found".formatted(nonExistentId));
+        }
+
+        @Test
+        @DisplayName("Should delete user and all his own items")
+        void deleteUserWithAllHiSOnItems() {
+            userService.refreshItemsTestData();
+            userService.delete(TEST_USER_1_ID);
+            Map<Long, Item> items = userService.getTestItemRepository().getItems();
+
+            assertThat(items.values())
+                    .noneMatch(item -> item.getOwnerId().equals(TEST_USER_1_ID));
         }
     }
 }
