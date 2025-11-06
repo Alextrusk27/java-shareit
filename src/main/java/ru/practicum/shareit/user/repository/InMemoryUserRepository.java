@@ -19,42 +19,45 @@ public class InMemoryUserRepository implements UserRepository {
     private final AtomicLong userIdGenerator;
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         validateEmailExists(user.getEmail());
         user.setId(userIdGenerator.incrementAndGet());
         users.put(user.getId(), user);
         emails.add(user.getEmail());
+        return user;
     }
 
     @Override
-    public void update(User user, long id) {
-        User existing = users.get(id);
+    public User update(User user, long userId) {
+        User existingUser = findById(userId);
 
         Optional.ofNullable(user.getName())
                 .filter(name -> !name.isBlank())
-                .ifPresent(existing::setName);
+                .ifPresent(existingUser::setName);
 
         Optional.ofNullable(user.getEmail())
                 .filter(email -> !email.isBlank())
-                .filter(email -> !email.equals(existing.getEmail()))
+                .filter(email -> !email.equals(existingUser.getEmail()))
                 .ifPresent(newEmail -> {
                     validateEmailExists(newEmail);
-                    emails.remove(existing.getEmail());
-                    existing.setEmail(newEmail);
+                    emails.remove(existingUser.getEmail());
+                    existingUser.setEmail(newEmail);
                     emails.add(newEmail);
                 });
+        return existingUser;
     }
 
     @Override
-    public void delete(long id) {
-        String email = users.get(id).getEmail();
+    public void delete(long userId) {
+        String email = findById(userId).getEmail();
         emails.remove(email);
-        users.remove(id);
+        users.remove(userId);
     }
 
     @Override
-    public Optional<User> findById(long id) {
-        return Optional.ofNullable(users.get(id));
+    public User findById(long userId) {
+        return Optional.ofNullable(users.get(userId))
+                .orElseThrow(() -> new NotFoundException("User with ID %d not found".formatted(userId)));
     }
 
     private void validateEmailExists(String email) {
@@ -63,9 +66,9 @@ public class InMemoryUserRepository implements UserRepository {
         }
     }
 
-    public void validateUserExists(long id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException("User with ID %d not found".formatted(id));
+    public void validateUserExists(long userId) {
+        if (!users.containsKey(userId)) {
+            throw new NotFoundException("User with ID %d not found".formatted(userId));
         }
     }
 }

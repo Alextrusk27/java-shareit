@@ -1,13 +1,12 @@
 package ru.practicum.shareit.user.service;
 
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.*;
 
 public interface UserService {
 
-    UserDto create(User user);
+    UserDto create(CreateUserRequest createRequest);
 
-    UserDto update(User user, long userId);
+    UserDto update(UpdateUserRequest updateRequest, long userId);
 
     void delete(long userId);
 

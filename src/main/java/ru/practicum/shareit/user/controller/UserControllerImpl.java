@@ -3,8 +3,7 @@ package ru.practicum.shareit.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.*;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 @Slf4j
@@ -14,17 +13,17 @@ public class UserControllerImpl implements UserController {
     private final UserServiceImpl userService;
 
     @Override
-    public UserDto createUser(User user) {
+    public UserDto createUser(CreateUserRequest createRequest) {
         log.info("Creating new user");
-        UserDto result = userService.create(user);
+        UserDto result = userService.create(createRequest);
         log.info("User created: id={}", result.id());
         return result;
     }
 
     @Override
-    public UserDto updateUser(User user, long userId) {
+    public UserDto updateUser(UpdateUserRequest updateRequest, long userId) {
         log.info("Updating user id={}", userId);
-        UserDto result = userService.update(user, userId);
+        UserDto result = userService.update(updateRequest, userId);
         log.info("User updated: id={}", result.id());
         return result;
     }
@@ -33,6 +32,7 @@ public class UserControllerImpl implements UserController {
     public void deleteUser(long userId) {
         log.info("Deleting user id={}", userId);
         userService.delete(userId);
+        log.info("User id={} was deleted", userId);
     }
 
     @Override

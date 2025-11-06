@@ -1,11 +1,9 @@
 package ru.practicum.shareit.item.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +11,8 @@ import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
-@Validated
 @RequestMapping("/items")
+@Validated
 public interface ItemController {
     String USER_ID_HEADER = "X-Sharer-User-Id";
 

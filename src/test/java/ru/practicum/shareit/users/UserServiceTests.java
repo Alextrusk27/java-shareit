@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import ru.practicum.shareit.exceptions.*;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.*;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -60,21 +60,19 @@ public class UserServiceTests {
         @Test
         @DisplayName("Should create new user with valid data")
         void createNewUser() {
-            userService.create(secondTestUser);
-            UserDto resultUser = userService.findById(TEST_USER_2_ID);
+            CreateUserRequest createSecondTestUser = new CreateUserRequest(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
+            userService.create(createSecondTestUser);
+            UserDto result = userService.findById(TEST_USER_2_ID);
 
-            assertThat(resultUser)
-                    .usingRecursiveComparison()
-                    .isEqualTo(secondTestUser);
+            assertThat(result)
+                    .extracting(UserDto::name, UserDto::email)
+                    .containsExactly(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
         }
 
         @Test
         @DisplayName("Should throw duplicate exception when email already exists")
         void createUserWithExistingEmail() {
-            User duplicateEmailUser = User.builder()
-                    .name("Different Name")
-                    .email(TEST_USER_1_EMAIL)
-                    .build();
+            CreateUserRequest duplicateEmailUser = new CreateUserRequest("Different Name", TEST_USER_1_EMAIL);
 
             assertThatThrownBy(() -> userService.create(duplicateEmailUser))
                     .isInstanceOf(DuplicateException.class)
@@ -88,49 +86,48 @@ public class UserServiceTests {
         @Test
         @DisplayName("Should update all fields when all fields provided")
         void updateUserWithAllFields() {
-            userService.update(secondTestUser, TEST_USER_1_ID);
-            secondTestUser.setId(TEST_USER_1_ID);
+            UpdateUserRequest updateUser = new UpdateUserRequest(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
+            userService.update(updateUser, TEST_USER_1_ID);
             UserDto resultUser = userService.findById(TEST_USER_1_ID);
 
             assertThat(resultUser)
                     .usingRecursiveComparison()
+                    .ignoringFields("id")
                     .isEqualTo(secondTestUser);
         }
 
         @Test
-        @DisplayName("Should update only name when email is null")
+        @DisplayName("Should update only name and preserve email when email is null")
         void updateUserNameWithNullEmail() {
-            secondTestUser.setEmail(null);
-            userService.update(secondTestUser, TEST_USER_1_ID);
-            secondTestUser.setId(TEST_USER_1_ID);
-            secondTestUser.setEmail(TEST_USER_1_EMAIL);
-            UserDto resultUser = userService.findById(TEST_USER_1_ID);
+            UpdateUserRequest updateRequest = new UpdateUserRequest(TEST_USER_2_NAME, null);
+            userService.update(updateRequest, TEST_USER_1_ID);
+            UserDto result = userService.findById(TEST_USER_1_ID);
 
-            assertThat(resultUser)
-                    .usingRecursiveComparison()
-                    .isEqualTo(secondTestUser);
+            assertThat(result)
+                    .extracting(UserDto::name, UserDto::email)
+                    .containsExactly(TEST_USER_2_NAME, TEST_USER_1_EMAIL);
         }
 
         @Test
-        @DisplayName("Should update only email when name is null")
+        @DisplayName("Should update only email and preserve name when name is null")
         void updateUserNameWithNullName() {
-            secondTestUser.setName(null);
-            userService.update(secondTestUser, TEST_USER_1_ID);
-            secondTestUser.setId(TEST_USER_1_ID);
-            secondTestUser.setName(TEST_USER_1_NAME);
-            UserDto resultUser = userService.findById(TEST_USER_1_ID);
+            UpdateUserRequest updateRequest = new UpdateUserRequest(null, TEST_USER_2_EMAIL);
+            userService.update(updateRequest, TEST_USER_1_ID);
+            UserDto result = userService.findById(TEST_USER_1_ID);
 
-            assertThat(resultUser)
-                    .usingRecursiveComparison()
-                    .isEqualTo(secondTestUser);
+            assertThat(result)
+                    .extracting(UserDto::name, UserDto::email)
+                    .containsExactly(TEST_USER_1_NAME, TEST_USER_2_EMAIL);
         }
 
         @Test
         @DisplayName("Should throw duplicate exception when updating to existing email")
         void updateUserEmailToExisting() {
-            userService.create(secondTestUser);
+            CreateUserRequest createRequest = new CreateUserRequest(TEST_USER_2_EMAIL, TEST_USER_2_EMAIL);
+            userService.create(createRequest);
+            UpdateUserRequest updateRequest = new UpdateUserRequest("Some_new_name", TEST_USER_1_EMAIL);
 
-            assertThatThrownBy(() -> userService.update(firstTestUser, TEST_USER_2_ID))
+            assertThatThrownBy(() -> userService.update(updateRequest, TEST_USER_2_ID))
                     .isInstanceOf(DuplicateException.class)
                     .hasMessageMatching("Email %s already exists".formatted(TEST_USER_1_EMAIL));        }
     }
