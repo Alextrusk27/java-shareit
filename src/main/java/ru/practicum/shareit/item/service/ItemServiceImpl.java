@@ -61,4 +61,10 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::mapItemToDto)
                 .toList();
     }
+
+    @Override
+    public void delete(long itemId, long ownerId) {
+        itemRepository.validateItemOwner(itemId, ownerId);
+        itemRepository.delete(itemId);
+    }
 }

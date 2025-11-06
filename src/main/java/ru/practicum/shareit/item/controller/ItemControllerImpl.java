@@ -60,7 +60,9 @@ public class ItemControllerImpl implements ItemController {
 
     @Override
     public void deleteItem(long itemId, long userId) {
-        log.info("DELETE request received: delete item id={} from user id={}", itemId, userId);
+        log.info("Deleting item id={} by user id={}", itemId, userId);
+        itemService.delete(itemId, userId);
+        log.info("Item id={} was deleted by owner id={}", itemId, userId);
     }
 
     private String getItemsLog(List<ItemDto> result) {

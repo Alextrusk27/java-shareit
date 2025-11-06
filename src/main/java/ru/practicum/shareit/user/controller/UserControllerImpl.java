@@ -29,13 +29,6 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public void deleteUser(long userId) {
-        log.info("Deleting user id={}", userId);
-        userService.delete(userId);
-        log.info("User id={} was deleted", userId);
-    }
-
-    @Override
     public UserDto getUserById(long userId) {
         log.info("Searching user id={}", userId);
         UserDto result = userService.findById(userId);

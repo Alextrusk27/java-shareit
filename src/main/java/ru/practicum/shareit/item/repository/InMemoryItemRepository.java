@@ -73,6 +73,11 @@ public class InMemoryItemRepository implements ItemRepository {
                 .toList();
     }
 
+    @Override
+    public void delete(long itemId) {
+        items.remove(itemId);
+    }
+
     public void validateItemExists(long itemId) {
         if (!items.containsKey(itemId)) {
             throw new NotFoundException("Item with ID %d not found".formatted(itemId));

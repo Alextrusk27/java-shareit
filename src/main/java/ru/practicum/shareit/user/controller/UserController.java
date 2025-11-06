@@ -21,11 +21,6 @@ public interface UserController {
                        @PathVariable @Positive(message = "User ID must be greater than 0")
                        long userId);
 
-    @DeleteMapping("/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteUser(@PathVariable @Positive(message = "User ID must be greater than 0")
-                    long userId);
-
     @GetMapping("/{userId}")
     UserDto getUserById(@PathVariable @Positive(message = "User ID must be greater than 0")
                         long userId);

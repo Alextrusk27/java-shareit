@@ -16,4 +16,6 @@ public interface ItemRepository {
     Optional<List<Item>> findByOwnerId(long ownerId);
 
     List<Item> findByQuery(String query);
+
+    void delete(long itemId);
 }
