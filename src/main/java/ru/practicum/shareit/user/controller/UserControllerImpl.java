@@ -35,4 +35,11 @@ public class UserControllerImpl implements UserController {
         log.info("User id={} was found", result.id());
         return result;
     }
+
+    @Override
+    public void delete(long userId) {
+        log.info("Deleting user id={}", userId);
+        userService.delete(userId);
+        log.info("User id={} was deleted", userId);
+    }
 }

@@ -24,4 +24,8 @@ public interface UserController {
     @GetMapping("/{userId}")
     UserDto getUserById(@PathVariable @Positive(message = "User ID must be greater than 0")
                         long userId);
+
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void delete(@PathVariable long userId);
 }
