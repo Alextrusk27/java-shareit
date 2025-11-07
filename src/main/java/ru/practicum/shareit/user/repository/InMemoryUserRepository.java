@@ -1,7 +1,5 @@
 package ru.practicum.shareit.user.repository;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.DuplicateException;
@@ -59,7 +57,7 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User findById(long userId) {
         return Optional.ofNullable(users.get(userId))
-                .orElseThrow(() -> new NotFoundException("User with ID %d not found".formatted(userId)));
+                .orElseThrow(() -> new NotFoundException("User id=%d not found".formatted(userId)));
     }
 
     private void validateEmailExists(String email) {
@@ -70,7 +68,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     public void validateUserExists(long userId) {
         if (!users.containsKey(userId)) {
-            throw new NotFoundException("User with ID %d not found".formatted(userId));
+            throw new NotFoundException("User id=%d not found".formatted(userId));
         }
     }
 

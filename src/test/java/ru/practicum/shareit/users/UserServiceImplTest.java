@@ -21,8 +21,9 @@ public class UserServiceImplTest extends UserServiceImpl {
         this.testItemRepository = itemRepository;
     }
 
-    public void refreshUsersTestData() {
+    public void resetTestData() {
         testUserRepository.clear();
+        testItemRepository.clear();
 
         testUserRepository.getUsers()
                 .put(TEST_USER_1_ID, User.builder()
@@ -32,10 +33,7 @@ public class UserServiceImplTest extends UserServiceImpl {
                         .build());
         testUserRepository.getEmails().add(TEST_USER_1_EMAIL);
         testUserRepository.getUserIdGenerator().set(TEST_USER_1_ID);
-    }
 
-    public void refreshItemsTestData() {
-        testItemRepository.clear();
         Map<Long, Item> items = testItemRepository.getItems();
         items.put(1L, Item.builder()
                 .id(1L)

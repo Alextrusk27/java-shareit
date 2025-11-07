@@ -27,14 +27,12 @@ public class ExceptionController {
     })
     public ErrorResponse handleValidationExceptions(final Exception e) {
         List<String> errors = switch (e) {
-            case ConstraintViolationException cve ->
-                cve.getConstraintViolations().stream()
-                        .map(ConstraintViolation::getMessage)
-                        .toList();
-            case MethodArgumentNotValidException mnv ->
-                    mnv.getBindingResult().getFieldErrors().stream()
-                        .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                        .toList();
+            case ConstraintViolationException cve -> cve.getConstraintViolations().stream()
+                    .map(ConstraintViolation::getMessage)
+                    .toList();
+            case MethodArgumentNotValidException mnv -> mnv.getBindingResult().getFieldErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
             case MethodArgumentTypeMismatchException mtm -> {
                 String typeName = mtm.getRequiredType() != null ?
                         mtm.getRequiredType().getName() : "unknown";

@@ -20,13 +20,14 @@ import static ru.practicum.shareit.users.UsersTestConfig.*;
 
 @SpringBootTest(classes = UsersTestConfig.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayName("UserService CRUD operations")
 public class UserServiceTests {
     @Autowired
     private UserServiceImplTest userService;
 
     @BeforeEach
     public void setup() {
-        userService.refreshUsersTestData();
+        userService.resetTestData();
     }
 
     @Nested
@@ -34,7 +35,7 @@ public class UserServiceTests {
     class FindUserTests {
         @Test
         @DisplayName("Should find existing user by ID")
-        void findUserById() {
+        void findById_WhenUserExists_ReturnsUser() {
             UserDto result = userService.findById(TEST_USER_1_ID);
 
             assertThat(result)
@@ -43,13 +44,13 @@ public class UserServiceTests {
         }
 
         @Test
-        @DisplayName("Should throw not found exception when searching non-existent user")
-        void findUserByEmail() {
+        @DisplayName("Should throw NotFoundException when searching non-existent user")
+        void findById_WhenUserNotExists_ThrowsNotFoundException() {
             long nonExistentId = 999L;
 
             assertThatThrownBy(() -> userService.findById(nonExistentId))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageMatching("User with ID %d not found".formatted(nonExistentId));
+                    .hasMessageMatching("User id=%d not found".formatted(nonExistentId));
         }
     }
 
@@ -58,7 +59,7 @@ public class UserServiceTests {
     class CreateUserTests {
         @Test
         @DisplayName("Should create new user with valid data")
-        void createNewUser() {
+        void create_WithValidData_CreatesUser() {
             CreateUserRequest createSecondTestUser = new CreateUserRequest(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
             userService.create(createSecondTestUser);
             UserDto result = userService.findById(TEST_USER_2_ID);
@@ -69,8 +70,8 @@ public class UserServiceTests {
         }
 
         @Test
-        @DisplayName("Should throw duplicate exception when email already exists")
-        void createUserWithExistingEmail() {
+        @DisplayName("Should throw DuplicateException when email already exists")
+        void create_WithExistingEmail_ThrowsDuplicateException() {
             CreateUserRequest duplicateEmailUser = new CreateUserRequest("Different Name", TEST_USER_1_EMAIL);
 
             assertThatThrownBy(() -> userService.create(duplicateEmailUser))
@@ -84,7 +85,7 @@ public class UserServiceTests {
     class UpdateUserTests {
         @Test
         @DisplayName("Should update all fields when all fields provided")
-        void updateUserWithAllFields() {
+        void update_WhenAllFieldsProvided_UpdatesAllFields() {
             UpdateUserRequest updateUser = new UpdateUserRequest(TEST_USER_2_NAME, TEST_USER_2_EMAIL);
             userService.update(updateUser, TEST_USER_1_ID);
             UserDto result = userService.findById(TEST_USER_1_ID);
@@ -96,7 +97,7 @@ public class UserServiceTests {
 
         @Test
         @DisplayName("Should update only name and preserve email when email is null")
-        void updateUserNameWithNullEmail() {
+        void update_WhenOnlyNameProvided_UpdatesNameAndPreservesEmail() {
             UpdateUserRequest updateRequest = new UpdateUserRequest(TEST_USER_2_NAME, null);
             userService.update(updateRequest, TEST_USER_1_ID);
             UserDto result = userService.findById(TEST_USER_1_ID);
@@ -108,7 +109,7 @@ public class UserServiceTests {
 
         @Test
         @DisplayName("Should update only email and preserve name when name is null")
-        void updateUserNameWithNullName() {
+        void update_WhenOnlyEmailProvided_UpdatesEmailAndPreservesName() {
             UpdateUserRequest updateRequest = new UpdateUserRequest(null, TEST_USER_2_EMAIL);
             userService.update(updateRequest, TEST_USER_1_ID);
             UserDto result = userService.findById(TEST_USER_1_ID);
@@ -119,15 +120,16 @@ public class UserServiceTests {
         }
 
         @Test
-        @DisplayName("Should throw duplicate exception when updating to existing email")
-        void updateUserEmailToExisting() {
+        @DisplayName("Should throw DuplicateException when updating to existing email")
+        void update_WithExistingEmail_ThrowsDuplicateException() {
             CreateUserRequest createRequest = new CreateUserRequest(TEST_USER_2_EMAIL, TEST_USER_2_EMAIL);
             userService.create(createRequest);
             UpdateUserRequest updateRequest = new UpdateUserRequest("Some_new_name", TEST_USER_1_EMAIL);
 
             assertThatThrownBy(() -> userService.update(updateRequest, TEST_USER_2_ID))
                     .isInstanceOf(DuplicateException.class)
-                    .hasMessageMatching("Email %s already exists".formatted(TEST_USER_1_EMAIL));        }
+                    .hasMessageMatching("Email %s already exists".formatted(TEST_USER_1_EMAIL));
+        }
     }
 
     @Nested
@@ -135,28 +137,27 @@ public class UserServiceTests {
     class DeleteUserTests {
         @Test
         @DisplayName("Should delete existing user by ID")
-        void deleteById() {
+        void delete_WhenUserExists_DeletesUser() {
             userService.delete(TEST_USER_1_ID);
 
             assertThatThrownBy(() -> userService.findById(TEST_USER_1_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageMatching("User with ID %d not found".formatted(TEST_USER_1_ID));
+                    .hasMessageMatching("User id=%d not found".formatted(TEST_USER_1_ID));
         }
 
         @Test
-        @DisplayName("Should throw exception when deleting non-existent user")
-        void deleteNonExistingUser() {
+        @DisplayName("Should throw NotFoundException when deleting non-existent user")
+        void delete_WhenUserNotExists_ThrowsNotFoundException() {
             long nonExistentId = 777L;
 
             assertThatThrownBy(() -> userService.delete(nonExistentId))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageMatching("User with ID %d not found".formatted(nonExistentId));
+                    .hasMessageMatching("User id=%d not found".formatted(nonExistentId));
         }
 
         @Test
-        @DisplayName("Should delete user and all his own items")
-        void deleteUserWithAllHiSOnItems() {
-            userService.refreshItemsTestData();
+        @DisplayName("Should delete user and all associated items")
+        void delete_WhenUserHasItems_DeletesUserAndAllItems() {
             userService.delete(TEST_USER_1_ID);
             Map<Long, Item> items = userService.getTestItemRepository().getItems();
 

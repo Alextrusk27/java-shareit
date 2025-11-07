@@ -6,7 +6,10 @@ import ru.practicum.shareit.exceptions.ItemOwnershipException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
@@ -80,7 +83,7 @@ public class InMemoryItemRepository implements ItemRepository {
 
     public void validateItemExists(long itemId) {
         if (!items.containsKey(itemId)) {
-            throw new NotFoundException("Item with ID %d not found".formatted(itemId));
+            throw new NotFoundException("Item id=%d not found".formatted(itemId));
         }
     }
 
@@ -88,7 +91,7 @@ public class InMemoryItemRepository implements ItemRepository {
         validateItemExists(itemId);
         Item item = items.get(itemId);
         if (item.getOwnerId() != ownerId) {
-            throw new ItemOwnershipException("User with ID %d is not owned by item with ID %d"
+            throw new ItemOwnershipException("User id=%d is not owned by item id=%d"
                     .formatted(ownerId, itemId));
         }
     }

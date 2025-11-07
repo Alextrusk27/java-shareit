@@ -15,6 +15,7 @@ public record UpdateUserRequest(
     public boolean hasName() {
         return name != null && !name.isBlank();
     }
+
     public boolean hasEmail() {
         return email != null;
     }
