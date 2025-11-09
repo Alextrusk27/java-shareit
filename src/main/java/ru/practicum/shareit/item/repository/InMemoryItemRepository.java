@@ -50,10 +50,10 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public Optional<List<Item>> findByOwnerId(long ownerId) {
-        return Optional.of(items.values().stream()
+    public List<Item> findByOwnerId(long ownerId) {
+        return items.values().stream()
                 .filter(item -> item.getOwnerId() == ownerId)
-                .toList());
+                .toList();
     }
 
     @Override

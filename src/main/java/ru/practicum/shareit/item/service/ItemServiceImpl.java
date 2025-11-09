@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.InMemoryItemRepository;
 import ru.practicum.shareit.user.repository.InMemoryUserRepository;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -48,7 +47,6 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> findByOwnerId(long ownerId) {
         userRepository.validateUserExists(ownerId);
         return itemRepository.findByOwnerId(ownerId)
-                .orElse(Collections.emptyList())
                 .stream()
                 .map(ItemMapper::mapItemToDto)
                 .toList();

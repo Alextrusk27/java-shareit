@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.InMemoryUserRepository;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -36,8 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(long userId) {
-        List<Item> userItems = itemRepository.findByOwnerId(userId)
-                .orElse(Collections.emptyList());
+        List<Item> userItems = itemRepository.findByOwnerId(userId);
         userItems.forEach(item -> itemRepository.delete(item.getId()));
         userRepository.delete(userId);
     }
