@@ -162,7 +162,7 @@ public class UserServiceTests {
             Map<Long, Item> items = userService.getTestItemRepository().getItems();
 
             assertThat(items.values())
-                    .noneMatch(item -> item.getOwnerId().equals(TEST_USER_1_ID));
+                    .noneMatch(item -> item.getUserId().equals(TEST_USER_1_ID));
         }
     }
 }

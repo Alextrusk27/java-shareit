@@ -27,8 +27,8 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public Item update(Item item, long itemId) {
-        Item existingItem = items.get(itemId);
+    public Item update(Item item) {
+        Item existingItem = items.get(item.getId());
 
         Optional.ofNullable(item.getName())
                 .filter(name -> !name.isBlank())
@@ -50,9 +50,9 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public List<Item> findByOwnerId(long ownerId) {
+    public List<Item> findByOwnerId(long userId) {
         return items.values().stream()
-                .filter(item -> item.getOwnerId() == ownerId)
+                .filter(item -> item.getUserId() == userId)
                 .toList();
     }
 
@@ -87,12 +87,12 @@ public class InMemoryItemRepository implements ItemRepository {
         }
     }
 
-    public void validateItemOwner(long itemId, long ownerId) {
+    public void validateItemOwner(long itemId, long userId) {
         validateItemExists(itemId);
         Item item = items.get(itemId);
-        if (item.getOwnerId() != ownerId) {
+        if (item.getUserId() != userId) {
             throw new ItemOwnershipException("User id=%d is not owned by item id=%d"
-                    .formatted(ownerId, itemId));
+                    .formatted(userId, itemId));
         }
     }
 

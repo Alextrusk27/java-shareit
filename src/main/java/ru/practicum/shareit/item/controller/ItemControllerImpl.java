@@ -3,9 +3,7 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.item.dto.CreateItemRequest;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import java.util.List;
@@ -27,18 +25,18 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public ItemDto updateItem(UpdateItemRequest updateRequest, long itemId, long userId) {
-        log.info("Updating item id={} for user id={}", itemId, userId);
-        ItemDto result = itemService.update(updateRequest, itemId, userId);
-        log.info("Item updated: id={} for user id={}", itemId, userId);
+    public ItemDto updateItem(UpdateItemRequest updateRequest, long id, long userId) {
+        log.info("Updating item id={} for user id={}", id, userId);
+        ItemDto result = itemService.update(updateRequest, id, userId);
+        log.info("Item updated: id={} for user id={}", id, userId);
         return result;
     }
 
     @Override
-    public ItemDto getItemById(long itemId) {
-        log.info("Searching item id={}", itemId);
-        ItemDto result = itemService.findById(itemId);
-        log.info("Item id={} was found", itemId);
+    public ItemDto getItemById(long id) {
+        log.info("Searching item id={}", id);
+        ItemDto result = itemService.findById(id);
+        log.info("Item id={} was found", id);
         return result;
     }
 
@@ -59,10 +57,10 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public void deleteItem(long itemId, long userId) {
-        log.info("Deleting item id={} by user id={}", itemId, userId);
-        itemService.delete(itemId, userId);
-        log.info("Item id={} was deleted by owner id={}", itemId, userId);
+    public void deleteItem(long id, long userId) {
+        log.info("Deleting item id={} by user id={}", id, userId);
+        itemService.delete(id, userId);
+        log.info("Item id={} was deleted by owner id={}", id, userId);
     }
 
     private String getItemsLog(List<ItemDto> result) {

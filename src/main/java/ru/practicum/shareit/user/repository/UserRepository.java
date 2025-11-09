@@ -5,7 +5,7 @@ import ru.practicum.shareit.user.model.User;
 public interface UserRepository {
     User save(User user);
 
-    User update(User user, long id);
+    User update(User user);
 
     void delete(long id);
 

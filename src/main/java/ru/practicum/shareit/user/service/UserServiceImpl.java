@@ -16,33 +16,34 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private final UserMapper userMapper;
     private final InMemoryUserRepository userRepository;
     private final InMemoryItemRepository itemRepository;
 
     @Override
     public UserDto create(CreateUserRequest createRequest) {
-        User newUser = UserMapper.mapCreateRequestToUser(createRequest);
+        User newUser = userMapper.toUserFromCreate(createRequest);
         newUser = userRepository.save(newUser);
-        return UserMapper.mapUserToDto(newUser);
+        return userMapper.toUserDto(newUser);
     }
 
     @Override
-    public UserDto update(UpdateUserRequest updateRequest, long userId) {
-        User updateUser = UserMapper.mapUpdateRequestToUser(updateRequest);
-        updateUser = userRepository.update(updateUser, userId);
-        return UserMapper.mapUserToDto(updateUser);
+    public UserDto update(UpdateUserRequest updateRequest, long id) {
+        User updateUser = userMapper.toUserFromUpdate(updateRequest, id);
+        updateUser = userRepository.update(updateUser);
+        return userMapper.toUserDto(updateUser);
     }
 
     @Override
-    public void delete(long userId) {
-        List<Item> userItems = itemRepository.findByOwnerId(userId);
+    public void delete(long id) {
+        List<Item> userItems = itemRepository.findByOwnerId(id);
         userItems.forEach(item -> itemRepository.delete(item.getId()));
-        userRepository.delete(userId);
+        userRepository.delete(id);
     }
 
     @Override
-    public UserDto findById(long userId) {
-        User user = userRepository.findById(userId);
-        return UserMapper.mapUserToDto(user);
+    public UserDto findById(long id) {
+        User user = userRepository.findById(id);
+        return userMapper.toUserDto(user);
     }
 }

@@ -9,7 +9,7 @@ public interface ItemRepository {
 
     Item save(Item item);
 
-    Item update(Item item, long itemId);
+    Item update(Item item);
 
     Optional<Item> findById(long itemId);
 

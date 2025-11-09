@@ -28,8 +28,8 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User update(User user, long userId) {
-        User existingUser = findById(userId);
+    public User update(User user) {
+        User existingUser = findById(user.getId());
 
         Optional.ofNullable(user.getName())
                 .filter(name -> !name.isBlank())

@@ -3,6 +3,7 @@ package ru.practicum.shareit.users;
 import lombok.Getter;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.items.InMemoryItemRepositoryTest;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -15,8 +16,10 @@ public class UserServiceImplTest extends UserServiceImpl {
     private final InMemoryUserRepositoryTest testUserRepository;
     private final InMemoryItemRepositoryTest testItemRepository;
 
-    public UserServiceImplTest(InMemoryUserRepositoryTest userRepository, InMemoryItemRepositoryTest itemRepository) {
-        super(userRepository, itemRepository);
+    public UserServiceImplTest(UserMapper userMapper,
+                               InMemoryUserRepositoryTest userRepository,
+                               InMemoryItemRepositoryTest itemRepository) {
+        super(userMapper, userRepository, itemRepository);
         this.testUserRepository = userRepository;
         this.testItemRepository = itemRepository;
     }
@@ -40,21 +43,21 @@ public class UserServiceImplTest extends UserServiceImpl {
                 .name("Name_x")
                 .description("Description_x")
                 .available(true)
-                .ownerId(TEST_USER_1_ID)
+                .userId(TEST_USER_1_ID)
                 .build());
         items.put(2L, Item.builder()
                 .id(2L)
                 .name("Name_y")
                 .description("Description_y")
                 .available(false)
-                .ownerId(TEST_USER_1_ID)
+                .userId(TEST_USER_1_ID)
                 .build());
         items.put(3L, Item.builder()
                 .id(3L)
                 .name("Name_z")
                 .description("Description_z")
                 .available(true)
-                .ownerId(TEST_USER_2_ID)
+                .userId(TEST_USER_2_ID)
                 .build());
     }
 }

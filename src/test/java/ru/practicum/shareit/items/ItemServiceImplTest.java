@@ -1,6 +1,7 @@
 package ru.practicum.shareit.items;
 
 import lombok.Getter;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.model.User;
@@ -15,8 +16,10 @@ public class ItemServiceImplTest extends ItemServiceImpl {
     private final InMemoryUserRepositoryTest testUserRepository;
     private final InMemoryItemRepositoryTest testItemRepository;
 
-    public ItemServiceImplTest(InMemoryItemRepositoryTest itemRepository, InMemoryUserRepositoryTest userRepository) {
-        super(itemRepository, userRepository);
+    public ItemServiceImplTest(ItemMapper itemMapper,
+                               InMemoryItemRepositoryTest itemRepository,
+                               InMemoryUserRepositoryTest userRepository) {
+        super(itemMapper, itemRepository, userRepository);
         this.testItemRepository = itemRepository;
         this.testUserRepository = userRepository;
         loadTestUsersData();
@@ -33,21 +36,21 @@ public class ItemServiceImplTest extends ItemServiceImpl {
                 .name(TEST_ITEM_1_NAME)
                 .description(TEST_ITEM_1_DESCRIPTION)
                 .available(true)
-                .ownerId(TEST_ITEMS_1_AND_2_OWNER_ID)
+                .userId(TEST_ITEMS_1_AND_2_OWNER_ID)
                 .build());
         items.put(ALL_ITEM_IDS[1], Item.builder()
                 .id(ALL_ITEM_IDS[1])
                 .name(TEST_ITEM_2_NAME)
                 .description(TEST_ITEM_2_DESCRIPTION)
                 .available(true)
-                .ownerId(TEST_ITEMS_1_AND_2_OWNER_ID)
+                .userId(TEST_ITEMS_1_AND_2_OWNER_ID)
                 .build());
         items.put(ALL_ITEM_IDS[2], Item.builder()
                 .id(ALL_ITEM_IDS[2])
                 .name(TEST_ITEM_3_NAME)
                 .description(TEST_ITEM_3_DESCRIPTION)
                 .available(true)
-                .ownerId(TEST_ITEM_3_OWNER_ID)
+                .userId(TEST_ITEM_3_OWNER_ID)
                 .build());
     }
 

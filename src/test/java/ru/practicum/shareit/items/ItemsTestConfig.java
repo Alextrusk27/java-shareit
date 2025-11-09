@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import ru.practicum.shareit.item.dto.CreateItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.users.InMemoryUserRepositoryTest;
@@ -40,7 +41,7 @@ public class ItemsTestConfig {
                 .id(ALL_ITEM_IDS[0])
                 .name(TEST_ITEM_1_NAME)
                 .description(TEST_ITEM_1_DESCRIPTION)
-                .ownerId(TEST_ITEMS_1_AND_2_OWNER_ID)
+                .userId(TEST_ITEMS_1_AND_2_OWNER_ID)
                 .available(true)
                 .build();
     }
@@ -52,7 +53,7 @@ public class ItemsTestConfig {
                 .id(ALL_ITEM_IDS[1])
                 .name(TEST_ITEM_2_NAME)
                 .description(TEST_ITEM_2_DESCRIPTION)
-                .ownerId(TEST_ITEMS_1_AND_2_OWNER_ID)
+                .userId(TEST_ITEMS_1_AND_2_OWNER_ID)
                 .available(true)
                 .build();
     }
@@ -64,7 +65,7 @@ public class ItemsTestConfig {
                 .id(ALL_ITEM_IDS[2])
                 .name(TEST_ITEM_3_NAME)
                 .description(TEST_ITEM_3_DESCRIPTION)
-                .ownerId(TEST_ITEM_3_OWNER_ID)
+                .userId(TEST_ITEM_3_OWNER_ID)
                 .available(true)
                 .build();
     }
@@ -110,9 +111,9 @@ public class ItemsTestConfig {
 
     @Bean
     @Primary
-    public ItemServiceImplTest itemService(InMemoryItemRepositoryTest itemRepository,
+    public ItemServiceImplTest itemService(ItemMapper itemMapper,
+                                           InMemoryItemRepositoryTest itemRepository,
                                            InMemoryUserRepositoryTest userRepository) {
-        return new ItemServiceImplTest(itemRepository, userRepository);
+        return new ItemServiceImplTest(itemMapper, itemRepository, userRepository);
     }
-
 }

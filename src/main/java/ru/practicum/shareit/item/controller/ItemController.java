@@ -22,26 +22,26 @@ public interface ItemController {
                        CreateItemRequest createRequest,
                        @RequestHeader(USER_ID_HEADER)
                        @Positive(message = "User ID must be greater than 0")
-                       long ownerId);
+                       long userId);
 
-    @PatchMapping("/{itemId}")
+    @PatchMapping("/{id}")
     ItemDto updateItem(@RequestBody @Valid
                        UpdateItemRequest updateRequest,
                        @PathVariable @Positive(message = "Item ID must be greater than 0")
-                       long itemId,
+                       long id,
                        @RequestHeader(USER_ID_HEADER)
                        @Positive(message = "User ID must be greater than 0")
-                       long ownerId);
+                       long userId);
 
 
-    @GetMapping("/{itemId}")
+    @GetMapping("/{id}")
     ItemDto getItemById(@PathVariable @Positive(message = "Item ID must be greater than 0")
-                        long itemId);
+                        long id);
 
     @GetMapping
     List<ItemDto> getOwnItems(@RequestHeader(USER_ID_HEADER)
                               @Positive(message = "User ID must be greater than 0")
-                              long ownerId);
+                              long userId);
 
     @GetMapping("/search")
     List<ItemDto> searchItems(@RequestParam
@@ -50,11 +50,11 @@ public interface ItemController {
                               @Size(max = 100, message = "Query must be no longer than 100 characters")
                               String text);
 
-    @DeleteMapping("/{itemId}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteItem(@PathVariable @Positive(message = "Item ID must be greater than 0")
-                    long itemId,
+                    long id,
                     @RequestHeader(USER_ID_HEADER)
                     @Positive(message = "User ID must be greater than 0")
-                    long ownerId);
+                    long userId);
 }

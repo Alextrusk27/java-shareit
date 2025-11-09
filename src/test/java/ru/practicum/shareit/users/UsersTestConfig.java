@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.items.InMemoryItemRepositoryTest;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Map;
@@ -44,8 +45,9 @@ public class UsersTestConfig {
 
     @Bean
     @Primary
-    public UserServiceImplTest userService(InMemoryUserRepositoryTest userRepository,
+    public UserServiceImplTest userService(UserMapper userMapper,
+                                           InMemoryUserRepositoryTest userRepository,
                                            InMemoryItemRepositoryTest itemRepository) {
-        return new UserServiceImplTest(userRepository, itemRepository);
+        return new UserServiceImplTest(userMapper, userRepository, itemRepository);
     }
 }

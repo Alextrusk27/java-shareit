@@ -16,39 +16,40 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
+    private final ItemMapper itemMapper;
     private final InMemoryItemRepository itemRepository;
     private final InMemoryUserRepository userRepository;
 
     @Override
-    public ItemDto create(CreateItemRequest createRequest, long ownerId) {
-        userRepository.validateUserExists(ownerId);
-        Item newItem = ItemMapper.mapCreateRequestToItem(createRequest, ownerId);
+    public ItemDto create(CreateItemRequest createRequest, long userId) {
+        userRepository.validateUserExists(userId);
+        Item newItem = itemMapper.toItemFromCreate(createRequest, userId);
         newItem = itemRepository.save(newItem);
-        return ItemMapper.mapItemToDto(newItem);
+        return itemMapper.toItemDto(newItem);
     }
 
     @Override
-    public ItemDto update(UpdateItemRequest updateRequest, long itemId, long ownerId) {
-        userRepository.validateUserExists(ownerId);
-        itemRepository.validateItemOwner(itemId, ownerId);
-        Item updateItem = ItemMapper.mapUpdateRequestToItem(updateRequest, itemId);
-        updateItem = itemRepository.update(updateItem, itemId);
-        return ItemMapper.mapItemToDto(updateItem);
+    public ItemDto update(UpdateItemRequest updateRequest, long id, long userId) {
+        userRepository.validateUserExists(userId);
+        itemRepository.validateItemOwner(id, userId);
+        Item updateItem = itemMapper.toItemFromUpdate(updateRequest, id, userId);
+        updateItem = itemRepository.update(updateItem);
+        return itemMapper.toItemDto(updateItem);
     }
 
     @Override
-    public ItemDto findById(long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException("Item id=%d not found".formatted(itemId)));
-        return ItemMapper.mapItemToDto(item);
+    public ItemDto findById(long id) {
+        Item item = itemRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Item id=%d not found".formatted(id)));
+        return itemMapper.toItemDto(item);
     }
 
     @Override
-    public List<ItemDto> findByOwnerId(long ownerId) {
-        userRepository.validateUserExists(ownerId);
-        return itemRepository.findByOwnerId(ownerId)
+    public List<ItemDto> findByOwnerId(long userId) {
+        userRepository.validateUserExists(userId);
+        return itemRepository.findByOwnerId(userId)
                 .stream()
-                .map(ItemMapper::mapItemToDto)
+                .map(itemMapper::toItemDto)
                 .toList();
     }
 
@@ -56,13 +57,13 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> findByQuery(String text) {
         return itemRepository.findByQuery(text)
                 .stream()
-                .map(ItemMapper::mapItemToDto)
+                .map(itemMapper::toItemDto)
                 .toList();
     }
 
     @Override
-    public void delete(long itemId, long ownerId) {
-        itemRepository.validateItemOwner(itemId, ownerId);
+    public void delete(long itemId, long userId) {
+        itemRepository.validateItemOwner(itemId, userId);
         itemRepository.delete(itemId);
     }
 }
