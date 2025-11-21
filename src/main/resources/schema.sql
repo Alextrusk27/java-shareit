@@ -11,16 +11,9 @@ CREATE TABLE IF NOT EXISTS items (
     name        VARCHAR(100) NOT NULL,
     description VARCHAR(500) NOT NULL,
     available   BOOLEAN NOT NULL DEFAULT true,
-    CONSTRAINT items_pk PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS user_items (
-    user_id BIGINT NOT NULL,
-    item_id BIGINT NOT NULL,
-    CONSTRAINT user_items_pk         PRIMARY KEY (user_id, item_id),
-    CONSTRAINT user_items_item_id_uk UNIQUE (item_id),
-    CONSTRAINT user_items_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT user_items_item_id_fk FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE CASCADE
+    user_id     BIGINT NOT NULL,
+    CONSTRAINT items_pk PRIMARY KEY (id),
+    CONSTRAINT items_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- TODO think about indexes

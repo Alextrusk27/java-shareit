@@ -1,16 +1,15 @@
 package ru.practicum.shareit.item.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ItemMapper {
     ItemDto toItemDto(Item item);
 
-    @Mapping(target = "id", ignore = true)
-    Item toItemFromCreate(CreateItemRequest createRequest, long userId);
+    Item toItemFromCreate(CreateItemRequest createRequest);
 
-    Item toItemFromUpdate(UpdateItemRequest updateRequest, long id, long userId);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateItem(UpdateItemRequest updateRequest, @MappingTarget Item item);
 }
