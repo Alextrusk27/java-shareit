@@ -58,6 +58,13 @@ public class ExceptionController {
         return new ErrorResponse("Duplicate data found", Collections.singletonList(e.getMessage()));
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UnavailableException.class)
+    public ErrorResponse handleUnavailableException(final UnavailableException e) {
+        log.info("Unavailable exception: {}", e.getMessage());
+        return new ErrorResponse("Resource unavailable", Collections.singletonList(e.getMessage()));
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
@@ -66,8 +73,8 @@ public class ExceptionController {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(ItemOwnershipException.class)
-    public ErrorResponse handleItemOwnershipException(final ItemOwnershipException e) {
+    @ExceptionHandler(OwnershipException.class)
+    public ErrorResponse handleItemOwnershipException(final OwnershipException e) {
         log.info("ItemOwnershipException exception: {}", e.getMessage());
         return new ErrorResponse("Ownerships conflict", Collections.singletonList(e.getMessage()));
     }

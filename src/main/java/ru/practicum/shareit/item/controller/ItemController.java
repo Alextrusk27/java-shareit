@@ -8,19 +8,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.sharing.HttpHeader;
 
 import java.util.List;
 
 @RequestMapping("/items")
 @Validated
 public interface ItemController {
-    String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ItemDto createItem(@RequestBody @Valid
                        CreateItemRequest createRequest,
-                       @RequestHeader(USER_ID_HEADER)
+                       @RequestHeader(HttpHeader.USER_ID)
                        @Positive(message = "User ID must be greater than 0")
                        long userId);
 
@@ -29,7 +29,7 @@ public interface ItemController {
                        UpdateItemRequest updateRequest,
                        @PathVariable @Positive(message = "Item ID must be greater than 0")
                        long id,
-                       @RequestHeader(USER_ID_HEADER)
+                       @RequestHeader(HttpHeader.USER_ID)
                        @Positive(message = "User ID must be greater than 0")
                        long userId);
 
@@ -39,7 +39,7 @@ public interface ItemController {
                         long id);
 
     @GetMapping
-    List<ItemDto> getOwnItems(@RequestHeader(USER_ID_HEADER)
+    List<ItemDto> getOwnItems(@RequestHeader(HttpHeader.USER_ID)
                               @Positive(message = "User ID must be greater than 0")
                               long userId);
 
@@ -54,7 +54,7 @@ public interface ItemController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteItem(@PathVariable @Positive(message = "Item ID must be greater than 0")
                     long id,
-                    @RequestHeader(USER_ID_HEADER)
+                    @RequestHeader(HttpHeader.USER_ID)
                     @Positive(message = "User ID must be greater than 0")
                     long userId);
 }

@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum EntityType {
     USER("User"),
-    ITEM("Item");
+    ITEM("Item"),
+    BOOKING("Booking"),;
 
     private final String name;
 

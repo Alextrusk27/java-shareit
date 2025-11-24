@@ -7,7 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exceptions.ItemOwnershipException;
+import ru.practicum.shareit.exceptions.OwnershipException;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -110,9 +110,9 @@ public class ItemServiceImpl implements ItemService {
         };
     }
 
-    private void checkItemOwnership(long itemId, long userId) {
+    public void checkItemOwnership(long itemId, long userId) {
         if (!itemRepository.existsByIdAndUserId(itemId, userId)) {
-            throw new ItemOwnershipException("User id=%d is not owner of item id=%d"
+            throw new OwnershipException("User id=%d is not owner of item id=%d"
                     .formatted(userId, itemId));
         }
     }
