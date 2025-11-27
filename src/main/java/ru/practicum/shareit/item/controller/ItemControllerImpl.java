@@ -41,9 +41,9 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public List<ItemDto> getOwnItems(long userId) {
+    public List<ItemWithBookingsDto> getOwnItems(long userId) {
         log.info("Searching all own items from user id={}", userId);
-        List<ItemDto> result = itemService.findByOwnerId(userId);
+        List<ItemWithBookingsDto> result = itemService.findByOwnerId(userId);
         log.info("Search result (owm items) by user id={}: {}", userId, getItemsLog(result));
         return result;
     }
@@ -63,7 +63,7 @@ public class ItemControllerImpl implements ItemController {
         log.info("Item id={} was deleted by owner id={}", id, userId);
     }
 
-    private String getItemsLog(List<ItemDto> result) {
+    private<T> String getItemsLog(List<T> result) {
         if (result.isEmpty()) {
             return "No items found";
         }

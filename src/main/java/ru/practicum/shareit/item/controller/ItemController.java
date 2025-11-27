@@ -39,7 +39,7 @@ public interface ItemController {
                         long id);
 
     @GetMapping
-    List<ItemDto> getOwnItems(@RequestHeader(HttpHeader.USER_ID)
+    List<ItemWithBookingsDto> getOwnItems(@RequestHeader(HttpHeader.USER_ID)
                               @Positive(message = "User ID must be greater than 0")
                               long userId);
 

@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.OwnershipException;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CreateItemRequest;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -60,12 +63,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findByOwnerId(long userId) {
+    public List<ItemWithBookingsDto> findByOwnerId(long userId) {
         entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
-        return itemRepository.findByUserId(userId)
-                .stream()
-                .map(itemMapper::toItemDto)
-                .toList();
+        return itemRepository.findByUserId(userId);
     }
 
     @Override
