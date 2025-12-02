@@ -72,18 +72,31 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemExtendedDto findById(Long id) {
+    public ItemExtendedDto findById(Long id, Long userId) {
+        entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
+        Item item = entityFinder.findOrThrow(itemRepository, id, EntityType.ITEM);
+
+        List<CommentDto> comments = commentRepository.findByItemId(id)
+                .stream()
+                .map(commentMapper::toCommentDto)
+                .toList();
+
+        if (!userId.equals(item.getOwner().getId())) {
+            return new ItemExtendedDto(
+                    item.getId(),
+                    item.getName(),
+                    item.getDescription(),
+                    item.getAvailable(),
+                    null,
+                    null,
+                    comments);
+        }
 
         ItemWithBookingProjection projection = itemRepository.findItemWithBookingInfo(id);
 
         if (projection == null) {
             throw new NotFoundException("%s id=%d not found".formatted(EntityType.ITEM.getName(), id));
         }
-
-        List<CommentDto> comments = commentRepository.findByItemId(id)
-                .stream()
-                .map(commentMapper::toCommentDto)
-                .toList();
 
         return itemMapper.toExtendedDtoWithComments(projection, comments);
     }

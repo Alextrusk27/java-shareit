@@ -41,7 +41,10 @@ public interface ItemController {
 
     @GetMapping("/{id}")
     ItemExtendedDto getItemById(@PathVariable @Positive(message = "Item ID must be greater than 0")
-                                long id);
+                                long id,
+                                @RequestHeader(HttpHeader.USER_ID)
+                                @Positive(message = "User ID must be greater than 0")
+                                long userId);
 
     @GetMapping
     List<ItemExtendedDto> getOwnItems(@RequestHeader(HttpHeader.USER_ID)

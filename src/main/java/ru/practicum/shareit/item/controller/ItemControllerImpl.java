@@ -38,9 +38,9 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public ItemExtendedDto getItemById(long id) {
+    public ItemExtendedDto getItemById(long id, long userId) {
         log.info("Searching item id={}", id);
-        ItemExtendedDto result = itemService.findById(id);
+        ItemExtendedDto result = itemService.findById(id, userId);
         log.info("Item id={} was found", id);
         return result;
     }

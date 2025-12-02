@@ -15,7 +15,7 @@ public interface ItemService {
 
     ItemDto update(UpdateItemRequest updateRequest, Long itemId, Long ownerId);
 
-    ItemExtendedDto findById(Long itemId);
+    ItemExtendedDto findById(Long itemId, Long userId);
 
     List<ItemExtendedDto> findByOwnerId(Long ownerId);
 
