@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
         if (!bookedItem.getAvailable()) {
             throw new UnavailableException("Item id=%d is unavailable".formatted(bookedItem.getId()));
         }
-        if (bookedItem.getUser().getId().equals(userId)) {
+        if (bookedItem.getOwner().getId().equals(userId)) {
             throw new UnavailableException("You cannot book your own item");
         }
 
@@ -60,10 +60,10 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = entityFinder.findOrThrow(bookingRepository, bookingId, EntityType.BOOKING);
         long itemId = booking.getItem().getId();
 
-        if (!itemRepository.existsByIdAndUserId(itemId, userId)) {
+        if (!itemRepository.existsByIdAndOwnerId(itemId, userId)) {
             throw new OwnershipException("User id=%d is not owner of item id=%d"
                     .formatted(userId, itemId));
-            }
+        }
 
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return bookingMapper.toBookingDto(booking);
@@ -73,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long bookingId, Long userId) {
         Booking booking = entityFinder.findOrThrow(bookingRepository, bookingId, EntityType.BOOKING);
         boolean isBooker = userId.equals(booking.getBooker().getId());
-        boolean isOwner = userId.equals(booking.getItem().getUser().getId());
+        boolean isOwner = userId.equals(booking.getItem().getOwner().getId());
 
         if (!isBooker && !isOwner) {
             throw new OwnershipException("Only booking author or item owner have access to this resource");
@@ -113,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
             case PAST -> bookingRepository.findPastByItemOwner(userId);
             case FUTURE -> bookingRepository.findFutureByItemOwner(userId);
             case WAITING -> bookingRepository
-            .findByItemOwnerAndStatus(userId, BookingStatus.WAITING);
+                    .findByItemOwnerAndStatus(userId, BookingStatus.WAITING);
             case REJECTED -> bookingRepository
                     .findByItemOwnerAndStatus(userId, BookingStatus.REJECTED);
         };

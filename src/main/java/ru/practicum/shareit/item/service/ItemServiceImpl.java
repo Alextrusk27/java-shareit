@@ -7,21 +7,33 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.OwnershipException;
-import ru.practicum.shareit.item.dto.CreateItemRequest;
+import ru.practicum.shareit.exceptions.UnavailableException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.ItemExtendedDto;
+import ru.practicum.shareit.item.dto.projection.ItemWithBookingProjection;
+import ru.practicum.shareit.item.dto.request.CreateCommentRequest;
+import ru.practicum.shareit.item.dto.request.CreateItemRequest;
+import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.sharing.EntityFinder;
 import ru.practicum.shareit.sharing.EntityType;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,24 +41,27 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
     private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
     private final EntityFinder entityFinder;
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ItemDto create(CreateItemRequest createRequest, long userId) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public ItemDto create(CreateItemRequest createRequest, Long userId) {
         User owner = entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
 
         Item item = itemMapper.toItemFromCreate(createRequest);
-        item.setUser(owner);
+        item.setOwner(owner);
         Item savedItem = itemRepository.save(item);
 
         return itemMapper.toItemDto(savedItem);
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ItemDto update(UpdateItemRequest updateRequest, long id, long userId) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public ItemDto update(UpdateItemRequest updateRequest, Long id, Long userId) {
         entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
         Item existingItem = entityFinder.findOrThrow(itemRepository, id, EntityType.ITEM);
         checkItemOwnership(id, userId);
@@ -57,15 +72,44 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto findById(long id) {
-        Item item = entityFinder.findOrThrow(itemRepository, id, EntityType.ITEM);
-        return itemMapper.toItemDto(item);
+    public ItemExtendedDto findById(Long id) {
+
+        ItemWithBookingProjection projection = itemRepository.findItemWithBookingInfo(id);
+
+        if (projection == null) {
+            throw new NotFoundException("%s id=%d not found".formatted(EntityType.ITEM.getName(), id));
+        }
+
+        List<CommentDto> comments = commentRepository.findByItemId(id)
+                .stream()
+                .map(commentMapper::toCommentDto)
+                .toList();
+
+        return itemMapper.toExtendedDtoWithComments(projection, comments);
     }
 
     @Override
-    public List<ItemWithBookingsDto> findByOwnerId(long userId) {
+    public List<ItemExtendedDto> findByOwnerId(Long userId) {
         entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
-        return itemRepository.findByUserId(userId);
+
+        List<ItemWithBookingProjection> items = itemRepository.findItemsWithBookingInfo(userId);
+
+        if (items.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> itemsIds = items.stream()
+                .map(ItemWithBookingProjection::getId).toList();
+
+        Map<Long, List<CommentDto>> commentsMap = commentMapper.toGroupedCommentsMap(commentRepository
+                .findByItemIds(itemsIds));
+
+        return items.stream()
+                .map(item -> itemMapper.toExtendedDtoWithComments(
+                        item,
+                        commentsMap.get(item.getId())
+                ))
+                .toList();
     }
 
     @Override
@@ -82,9 +126,32 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public void delete(long itemId, long userId) {
+    public void delete(Long itemId, Long userId) {
         checkItemOwnership(itemId, userId);
         itemRepository.deleteById(itemId);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public CommentDto createComment(CreateCommentRequest createRequest, Long itemId, Long authorId) {
+        User booker = entityFinder.findOrThrow(userRepository, authorId, EntityType.USER);
+        Item item = entityFinder.findOrThrow(itemRepository, itemId, EntityType.ITEM);
+        List<Booking> bookings = bookingRepository.findByItemAndBooker(itemId, authorId);
+
+        if (bookings.isEmpty()) {
+            throw new OwnershipException("User id=%d hasn't approved bookings for this item".formatted(authorId));
+        }
+
+        if (bookings.stream()
+                .noneMatch(booking -> booking.getEnd().isBefore(LocalDateTime.now()))) {
+            throw new UnavailableException("Booking doesn't finish yet");
+        }
+
+        Comment comment = commentMapper.toCommentFromCreate(createRequest);
+        comment.setItem(item);
+        comment.setAuthor(booker);
+        Comment savedComment = commentRepository.save(comment);
+        return commentMapper.toCommentDto(savedComment);
     }
 
     private Specification<Item> createSearchSpecification(String text) {
@@ -110,8 +177,8 @@ public class ItemServiceImpl implements ItemService {
         };
     }
 
-    public void checkItemOwnership(long itemId, long userId) {
-        if (!itemRepository.existsByIdAndUserId(itemId, userId)) {
+    public void checkItemOwnership(Long itemId, Long userId) {
+        if (!itemRepository.existsByIdAndOwnerId(itemId, userId)) {
             throw new OwnershipException("User id=%d is not owner of item id=%d"
                     .formatted(userId, itemId));
         }

@@ -3,7 +3,12 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemExtendedDto;
+import ru.practicum.shareit.item.dto.request.CreateCommentRequest;
+import ru.practicum.shareit.item.dto.request.CreateItemRequest;
+import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import java.util.List;
@@ -33,17 +38,17 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public ItemDto getItemById(long id) {
+    public ItemExtendedDto getItemById(long id) {
         log.info("Searching item id={}", id);
-        ItemDto result = itemService.findById(id);
+        ItemExtendedDto result = itemService.findById(id);
         log.info("Item id={} was found", id);
         return result;
     }
 
     @Override
-    public List<ItemWithBookingsDto> getOwnItems(long userId) {
+    public List<ItemExtendedDto> getOwnItems(long userId) {
         log.info("Searching all own items from user id={}", userId);
-        List<ItemWithBookingsDto> result = itemService.findByOwnerId(userId);
+        List<ItemExtendedDto> result = itemService.findByOwnerId(userId);
         log.info("Search result (owm items) by user id={}: {}", userId, getItemsLog(result));
         return result;
     }
@@ -63,7 +68,15 @@ public class ItemControllerImpl implements ItemController {
         log.info("Item id={} was deleted by owner id={}", id, userId);
     }
 
-    private<T> String getItemsLog(List<T> result) {
+    @Override
+    public CommentDto createComment(CreateCommentRequest commentRequest, long itemId, long authorId) {
+        log.info("Creating new comment {} by author id={} for item id={}", commentRequest.text(), authorId, itemId);
+        CommentDto comment = itemService.createComment(commentRequest, itemId, authorId);
+        log.info("Comment created: id={}", comment.id());
+        return comment;
+    }
+
+    private <T> String getItemsLog(List<T> result) {
         if (result.isEmpty()) {
             return "No items found";
         }
