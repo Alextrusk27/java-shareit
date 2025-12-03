@@ -14,6 +14,6 @@ public record ItemExtendedDto(Long id,
     public ItemExtendedDto {
         lastBooking = lastBooking != null && lastBooking.id() == null ? null : lastBooking;
         nextBooking = nextBooking != null && nextBooking.id() == null ? null : nextBooking;
-        comments = comments != null ? comments : List.of();  // Защита от null
+        comments = comments != null ? comments : List.of();
     }
 }

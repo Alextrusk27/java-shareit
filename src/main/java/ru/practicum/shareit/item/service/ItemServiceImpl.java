@@ -7,15 +7,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingInfo;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.OwnershipException;
 import ru.practicum.shareit.exceptions.UnavailableException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
-import ru.practicum.shareit.item.dto.projection.ItemWithBookingProjection;
 import ru.practicum.shareit.item.dto.request.CreateCommentRequest;
 import ru.practicum.shareit.item.dto.request.CreateItemRequest;
 import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
+    private final BookingMapper bookingMapper;
     private final EntityFinder entityFinder;
 
     @Override
@@ -71,6 +73,7 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.toItemDto(updatedItem);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ItemExtendedDto findById(Long id, Long userId) {
         entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
@@ -81,47 +84,71 @@ public class ItemServiceImpl implements ItemService {
                 .map(commentMapper::toCommentDto)
                 .toList();
 
+        BookingInfo lastBooking = null;
+        BookingInfo nextBooking = null;
+
         if (!userId.equals(item.getOwner().getId())) {
-            return new ItemExtendedDto(
-                    item.getId(),
-                    item.getName(),
-                    item.getDescription(),
-                    item.getAvailable(),
-                    null,
-                    null,
-                    comments);
+            return itemMapper.toExtendedDto(
+                    item,
+                    lastBooking,
+                    nextBooking,
+                    comments
+            );
         }
+        lastBooking = bookingRepository.findLastBookingByItemId(id)
+                .map(bookingMapper::toBookingInfo)
+                .orElse(null);
+        nextBooking = bookingRepository.findNextBookingByItemId(id)
+                .map(bookingMapper::toBookingInfo)
+                .orElse(null);
 
-        ItemWithBookingProjection projection = itemRepository.findItemWithBookingInfo(id);
-
-        if (projection == null) {
-            throw new NotFoundException("%s id=%d not found".formatted(EntityType.ITEM.getName(), id));
-        }
-
-        return itemMapper.toExtendedDtoWithComments(projection, comments);
+        return itemMapper.toExtendedDto(
+                item,
+                lastBooking,
+                nextBooking,
+                comments
+        );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemExtendedDto> findByOwnerId(Long userId) {
         entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
-
-        List<ItemWithBookingProjection> items = itemRepository.findItemsWithBookingInfo(userId);
+        List<Item> items = itemRepository.findByOwnerId(userId);
 
         if (items.isEmpty()) {
             return List.of();
         }
 
         List<Long> itemsIds = items.stream()
-                .map(ItemWithBookingProjection::getId).toList();
+                .map(Item::getId)
+                .toList();
 
-        Map<Long, List<CommentDto>> commentsMap = commentMapper.toGroupedCommentsMap(commentRepository
-                .findByItemIds(itemsIds));
+        Map<Long, BookingInfo> lastBookings = bookingRepository.findLastBookingsByItemIds(itemsIds)
+                .stream()
+                .collect(Collectors.toMap(booking -> booking.getItem().getId(), bookingMapper::toBookingInfo));
+
+        Map<Long, BookingInfo> nextBookings = bookingRepository.findNextBookingsByItemIds(itemsIds)
+                .stream()
+                .collect(Collectors.toMap(booking -> booking.getItem().getId(), bookingMapper::toBookingInfo));
+
+        Map<Long, List<CommentDto>> comments = commentRepository.findByItemIds(itemsIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        comment -> comment.getItem().getId(),
+                        Collectors.mapping(
+                                commentMapper::toCommentDto,
+                                Collectors.toList()
+                        )
+                ));
 
         return items.stream()
-                .map(item -> itemMapper.toExtendedDtoWithComments(
+                .map(item -> itemMapper.toExtendedDto(
                         item,
-                        commentsMap.get(item.getId())
-                ))
+                        lastBookings.get(item.getId()),
+                        nextBookings.get(item.getId()),
+                        comments.get(item.getId()))
+                )
                 .toList();
     }
 
