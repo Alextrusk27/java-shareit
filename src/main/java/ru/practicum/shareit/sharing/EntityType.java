@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum EntityType {
     USER("User"),
     ITEM("Item"),
-    BOOKING("Booking"),;
+    BOOKING("Booking"),
+    ITEM_REQUEST("ItemRequest");
 
     private final String name;
 

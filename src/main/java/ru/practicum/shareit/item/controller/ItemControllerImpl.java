@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
-import ru.practicum.shareit.item.dto.request.CreateCommentRequest;
-import ru.practicum.shareit.item.dto.request.CreateItemRequest;
-import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.request.CreateComment;
+import ru.practicum.shareit.item.dto.request.CreateItem;
+import ru.practicum.shareit.item.dto.request.UpdateItem;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import java.util.List;
@@ -22,15 +22,16 @@ public class ItemControllerImpl implements ItemController {
     private final ItemServiceImpl itemService;
 
     @Override
-    public ItemDto createItem(CreateItemRequest createRequest, long userId) {
-        log.info("Creating new item {} for user id={}", createRequest.name(), userId);
+    public ItemDto createItem(CreateItem createRequest, long userId) {
+        log.info("Creating new item {} for user id={}{}", createRequest.name(), userId,
+                createRequest.requestId() != null ? " on request id=%d".formatted(createRequest.requestId()) : "");
         ItemDto result = itemService.create(createRequest, userId);
         log.info("Item created: id={} for user id={}", result.id(), userId);
         return result;
     }
 
     @Override
-    public ItemDto updateItem(UpdateItemRequest updateRequest, long id, long userId) {
+    public ItemDto updateItem(UpdateItem updateRequest, long id, long userId) {
         log.info("Updating item id={} for user id={}", id, userId);
         ItemDto result = itemService.update(updateRequest, id, userId);
         log.info("Item updated: id={} for user id={}", id, userId);
@@ -69,7 +70,7 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public CommentDto createComment(CreateCommentRequest commentRequest, long itemId, long authorId) {
+    public CommentDto createComment(CreateComment commentRequest, long itemId, long authorId) {
         log.info("Creating new comment {} by author id={} for item id={}", commentRequest.text(), authorId, itemId);
         CommentDto comment = itemService.createComment(commentRequest, itemId, authorId);
         log.info("Comment created: id={}", comment.id());

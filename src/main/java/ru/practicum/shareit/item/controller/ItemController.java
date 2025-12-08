@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
-import ru.practicum.shareit.item.dto.request.CreateCommentRequest;
-import ru.practicum.shareit.item.dto.request.CreateItemRequest;
-import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.request.CreateComment;
+import ru.practicum.shareit.item.dto.request.CreateItem;
+import ru.practicum.shareit.item.dto.request.UpdateItem;
 import ru.practicum.shareit.sharing.HttpHeader;
 
 import java.util.List;
@@ -24,14 +24,14 @@ public interface ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ItemDto createItem(@RequestBody @Valid
-                       CreateItemRequest createRequest,
+                       CreateItem createRequest,
                        @RequestHeader(HttpHeader.USER_ID)
                        @Positive(message = "User ID must be greater than 0")
                        long userId);
 
     @PatchMapping("/{id}")
     ItemDto updateItem(@RequestBody @Valid
-                       UpdateItemRequest updateRequest,
+                       UpdateItem updateRequest,
                        @PathVariable @Positive(message = "Item ID must be greater than 0")
                        long id,
                        @RequestHeader(HttpHeader.USER_ID)
@@ -68,7 +68,7 @@ public interface ItemController {
 
     @PostMapping("/{itemId}/comment")
     CommentDto createComment(@RequestBody @Valid
-                             CreateCommentRequest commentRequest,
+                             CreateComment commentRequest,
                              @PathVariable @Positive(message = "Item ID must be greater than 0")
                              long itemId,
                              @RequestHeader(HttpHeader.USER_ID)

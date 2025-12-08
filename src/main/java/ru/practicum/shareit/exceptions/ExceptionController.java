@@ -5,10 +5,10 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -19,13 +19,12 @@ import java.util.List;
 @RestControllerAdvice
 public class ExceptionController {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({
             ConstraintViolationException.class,
             MethodArgumentNotValidException.class,
             MethodArgumentTypeMismatchException.class
     })
-    public ErrorResponse handleValidationExceptions(final Exception e) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(final Exception e) {
         List<String> errors = switch (e) {
             case ConstraintViolationException cve -> cve.getConstraintViolations().stream()
                     .map(ConstraintViolation::getMessage)
@@ -41,41 +40,42 @@ public class ExceptionController {
             default -> List.of(e.getMessage());
         };
         log.info("Validation exception: {}", errors);
-        return new ErrorResponse("Validation Failed", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("Validation Failed", errors));
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(MissingRequestHeaderException.class)
-    public ErrorResponse handleMissingRequestHeaderExceptions(final MissingRequestHeaderException e) {
+    public ResponseEntity<ErrorResponse> handleMissingRequestHeaderExceptions(final MissingRequestHeaderException e) {
         log.info("Missing headers exception: {}", e.getMessage());
-        return new ErrorResponse("Missing required headers: '%s'", List.of(e.getHeaderName()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("Missing required headers: '%s'", List.of(e.getHeaderName())));
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DuplicateException.class)
-    public ErrorResponse handleDuplicateException(final DuplicateException e) {
+    public ResponseEntity<ErrorResponse> handleDuplicateException(final DuplicateException e) {
         log.info("Duplicate exception: {}", e.getMessage());
-        return new ErrorResponse("Duplicate data found", Collections.singletonList(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("Duplicate data found", Collections.singletonList(e.getMessage())));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UnavailableException.class)
-    public ErrorResponse handleUnavailableException(final UnavailableException e) {
+    public ResponseEntity<ErrorResponse> handleUnavailableException(final UnavailableException e) {
         log.info("Unavailable exception: {}", e.getMessage());
-        return new ErrorResponse("Resource unavailable", Collections.singletonList(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("Resource unavailable", Collections.singletonList(e.getMessage())));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
-    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+    public ResponseEntity<ErrorResponse> handleNotFoundException(final NotFoundException e) {
         log.info("NotFound exception: {}", e.getMessage());
-        return new ErrorResponse("Not found", Collections.singletonList(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("Resource not found", Collections.singletonList(e.getMessage())));
     }
 
-    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(OwnershipException.class)
-    public ErrorResponse handleItemOwnershipException(final OwnershipException e) {
+    public ResponseEntity<ErrorResponse> handleItemOwnershipException(final OwnershipException e) {
         log.info("ItemOwnershipException exception: {}", e.getMessage());
-        return new ErrorResponse("Ownerships conflict", Collections.singletonList(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("Forbidden", Collections.singletonList(e.getMessage())));
     }
 }

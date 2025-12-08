@@ -5,8 +5,8 @@ import ru.practicum.shareit.booking.dto.BookingInfo;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
-import ru.practicum.shareit.item.dto.request.CreateItemRequest;
-import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.request.CreateItem;
+import ru.practicum.shareit.item.dto.request.UpdateItem;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -15,10 +15,10 @@ import java.util.List;
 public interface ItemMapper {
     ItemDto toItemDto(Item item);
 
-    Item toItemFromCreate(CreateItemRequest createRequest);
+    Item toItemFromCreate(CreateItem createRequest);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateItem(UpdateItemRequest updateRequest, @MappingTarget Item item);
+    void updateItem(UpdateItem updateRequest, @MappingTarget Item item);
 
     default ItemExtendedDto toExtendedDto(Item item,
                                           BookingInfo lastBooking,

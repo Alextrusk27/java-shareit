@@ -1,11 +1,8 @@
 package ru.practicum.shareit.item.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
-public record CreateItemRequest(
+public record CreateItem(
         @NotBlank(message = "Item name cannot be empty")
         @Pattern(regexp = "^[\\p{L}\\d\\s]+$", message = "Item name contains invalid characters")
         @Size(max = 50, message = "Name must be no longer than 50 characters")
@@ -17,6 +14,9 @@ public record CreateItemRequest(
         String description,
 
         @NotNull(message = "Available status is required")
-        Boolean available
+        Boolean available,
+
+        @Positive(message = "Request ID must be greater than 0")
+        Long requestId
 ) {
 }

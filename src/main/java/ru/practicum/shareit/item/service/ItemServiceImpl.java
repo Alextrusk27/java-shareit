@@ -16,15 +16,17 @@ import ru.practicum.shareit.exceptions.UnavailableException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtendedDto;
-import ru.practicum.shareit.item.dto.request.CreateCommentRequest;
-import ru.practicum.shareit.item.dto.request.CreateItemRequest;
-import ru.practicum.shareit.item.dto.request.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.request.CreateComment;
+import ru.practicum.shareit.item.dto.request.CreateItem;
+import ru.practicum.shareit.item.dto.request.UpdateItem;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.sharing.EntityFinder;
 import ru.practicum.shareit.sharing.EntityType;
 import ru.practicum.shareit.user.model.User;
@@ -44,26 +46,32 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
     private final BookingMapper bookingMapper;
     private final EntityFinder entityFinder;
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public ItemDto create(CreateItemRequest createRequest, Long userId) {
+    @Transactional
+    public ItemDto create(CreateItem createRequest, Long userId) {
         User owner = entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
-
         Item item = itemMapper.toItemFromCreate(createRequest);
         item.setOwner(owner);
-        Item savedItem = itemRepository.save(item);
 
+        Long requestId = createRequest.requestId();
+
+        if (requestId != null) {
+            itemRequestRepository.findById(requestId)
+                    .ifPresent(itemRequest -> item.getItemRequests().add(itemRequest));
+        }
+        Item savedItem = itemRepository.save(item);
         return itemMapper.toItemDto(savedItem);
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public ItemDto update(UpdateItemRequest updateRequest, Long id, Long userId) {
+    @Transactional
+    public ItemDto update(UpdateItem updateRequest, Long id, Long userId) {
         entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
         Item existingItem = entityFinder.findOrThrow(itemRepository, id, EntityType.ITEM);
         checkItemOwnership(id, userId);
@@ -172,8 +180,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public CommentDto createComment(CreateCommentRequest createRequest, Long itemId, Long authorId) {
+    @Transactional
+    public CommentDto createComment(CreateComment createRequest, Long itemId, Long authorId) {
         User booker = entityFinder.findOrThrow(userRepository, authorId, EntityType.USER);
         Item item = entityFinder.findOrThrow(itemRepository, itemId, EntityType.ITEM);
         List<Booking> bookings = bookingRepository.findByItemAndBooker(itemId, authorId);
@@ -183,7 +191,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         if (bookings.stream()
-                .noneMatch(booking -> booking.getEnd().isBefore(LocalDateTime.now()))) {
+                .noneMatch(booking -> booking.getEnd().isBefore(LocalDateTime.now().plusHours(3)))) {
             throw new UnavailableException("Booking doesn't finish yet");
         }
 
