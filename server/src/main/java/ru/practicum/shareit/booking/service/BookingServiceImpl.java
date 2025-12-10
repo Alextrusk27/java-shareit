@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingRequest;
@@ -32,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
     private final EntityFinder entityFinder;
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public BookingDto createBooking(CreateBookingRequest createRequest, Long userId) {
         User booker = entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
         Item bookedItem = entityFinder.findOrThrow(itemRepository, createRequest.itemId(), EntityType.ITEM);
@@ -55,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public BookingDto updateBookingStatus(Long bookingId, boolean approved, Long userId) {
         Booking booking = entityFinder.findOrThrow(bookingRepository, bookingId, EntityType.BOOKING);
         long itemId = booking.getItem().getId();
@@ -125,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public void deleteBookingById(Long bookingId, Long userId) {
         User bookingAuthor = entityFinder.findOrThrow(userRepository, userId, EntityType.USER);
         Booking booking = entityFinder.findOrThrow(bookingRepository, bookingId, EntityType.BOOKING);

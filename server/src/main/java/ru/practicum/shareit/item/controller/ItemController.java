@@ -80,6 +80,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
+    @ResponseStatus(HttpStatus.CREATED)
     CommentDto createComment(@RequestBody CreateComment commentRequest,
                              @PathVariable long itemId,
                              @RequestHeader(HttpHeader.USER_ID) long authorId) {

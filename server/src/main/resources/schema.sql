@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS bookings (
    status     VARCHAR(20) NOT NULL,
    CONSTRAINT bookings_item_id_fk   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
    CONSTRAINT bookings_booker_id_fk FOREIGN KEY (booker_id) REFERENCES users(id) ON DELETE CASCADE,
-   CONSTRAINT bookings_dates_check  CHECK (start_date >= CURRENT_TIMESTAMP AND end_date > start_date),
+   CONSTRAINT bookings_dates_check  CHECK (end_date > start_date),
    CONSTRAINT bookings_status_check CHECK (status IN ('APPROVED', 'REJECTED', 'WAITING'))
 );
 
