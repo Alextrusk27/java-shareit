@@ -53,8 +53,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("REST API unit tests")
-class ShareItRestApiTest {
+@DisplayName("REST API Unit tests")
+class ServerRestApiTest {
 
     private MockMvc mvc;
 
@@ -363,7 +363,7 @@ class ShareItRestApiTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$.length()").value(2)) // только 2 доступных
+                    .andExpect(jsonPath("$.length()").value(2))
                     .andExpect(jsonPath("$[0].id", is(1L), Long.class))
                     .andExpect(jsonPath("$[0].name", is("Electric Drill")))
                     .andExpect(jsonPath("$[0].description", containsString("drill")))

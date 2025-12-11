@@ -25,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 @AutoConfigureJsonTesters
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DisplayName("JSON DTO tests")
-public class ShareItDtoJsonTests {
+@DisplayName("JSON DTO Tests")
+public class GatewayDtoJsonTest {
 
     @Nested
     @DisplayName("Users DTO")

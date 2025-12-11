@@ -53,8 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         classes = ShareItApp.class,
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DisplayName("Services CRUD operations")
-class ShareItIntegrationTest {
+@DisplayName("Service Layer Integration Tests")
+class ServiceLayerIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.1")
@@ -420,8 +420,8 @@ class ShareItIntegrationTest {
             assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.PAST)).hasSize(1);
             assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.CURRENT)).hasSize(1);
             assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.FUTURE)).hasSize(1);
-            assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.WAITING)).hasSize(2); // current и future
-            assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.REJECTED)).hasSize(1); // past
+            assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.WAITING)).hasSize(2);
+            assertThat(bookingService.getBookingsByBookerId(booker.getId(), BookingState.REJECTED)).hasSize(1);
         }
 
         @Test
@@ -455,8 +455,8 @@ class ShareItIntegrationTest {
             assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.PAST)).hasSize(1);
             assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.CURRENT)).hasSize(1);
             assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.FUTURE)).hasSize(1);
-            assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.WAITING)).hasSize(2); // current и future
-            assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.REJECTED)).hasSize(1); // past
+            assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.WAITING)).hasSize(2);
+            assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.REJECTED)).hasSize(1);
         }
         @Test
         @DisplayName("Should delete booking")
@@ -479,7 +479,6 @@ class ShareItIntegrationTest {
         @Test
         @DisplayName("Should throw OwnershipException when called by non-booker")
         void deleteBookingByIdByNonBooker() {
-            // Arrange
             User owner = addAndGetNewUser();
             User booker = addAndGetNewUser();
             User otherUser = addAndGetNewUser();
