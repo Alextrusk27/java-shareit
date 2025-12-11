@@ -19,6 +19,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.exception.DuplicateException;
 import ru.practicum.shareit.exception.OwnershipException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -103,6 +104,21 @@ class ServiceLayerIntegrationTest {
         }
 
         @Test
+        @DisplayName("Should throw exception when creating user with duplicate email")
+        void createUserWithDuplicateEmail() {
+            String duplicateEmail = "duplicate@email.com";
+
+            CreateUserRequest firstUser = new CreateUserRequest("First User", duplicateEmail);
+            userService.create(firstUser);
+
+            CreateUserRequest secondUser = new CreateUserRequest("Second User", duplicateEmail);
+
+            assertThatThrownBy(() -> userService.create(secondUser))
+                    .isInstanceOf(DuplicateException.class)
+                    .hasMessageContaining("Email %s already exists", duplicateEmail);
+        }
+
+        @Test
         @DisplayName("Should update existing user with valid fields")
         void updateExistingUser() {
             User newUser = addAndGetNewUser();
@@ -133,6 +149,17 @@ class ServiceLayerIntegrationTest {
             assertThat(user.name()).isEqualTo(newUser.getName());
             assertThat(user.email()).isEqualTo(newUser.getEmail());
         }
+
+        @Test
+        @DisplayName("Should delete user")
+        void deleteUserById() {
+            User user = addAndGetNewUser();
+            Long userId = user.getId();
+
+            assertThat(entityManager.find(User.class, userId)).isNotNull();
+            userService.delete(userId);
+            assertThat(entityManager.find(User.class, userId)).isNull();
+        }
     }
 
     @Nested
@@ -162,7 +189,7 @@ class ServiceLayerIntegrationTest {
 
         @Test
         @DisplayName("Should link item to existing ItemRequest when requestId is provided")
-        void createItem_WithRequestId_ShouldLinkToItemRequest() {
+        void createItemWithRequestId() {
             User owner = addAndGetNewUser();
             ItemRequest itemRequest = addAndGetNewItemRequest(owner.getId());
             CreateItem createRequest = new CreateItem("Item name", "Item description", true, itemRequest.getId());
@@ -194,6 +221,27 @@ class ServiceLayerIntegrationTest {
         }
 
         @Test
+        @DisplayName("Should throw exception when non-owner tries to update item")
+        void updateItemNonOwner() {
+            User owner = addAndGetNewUser();
+            User nonOwner = addAndGetNewUser();
+            Item existingItem = addAndGetNewItem(owner.getId());
+            Long itemId = existingItem.getId();
+
+            UpdateItem updateRequest = new UpdateItem("Updated Name", "Updated Description", false);
+
+            assertThatThrownBy(() ->
+                    itemService.update(updateRequest, itemId, nonOwner.getId())
+            )
+                    .isInstanceOf(OwnershipException.class)
+                    .hasMessageContaining("User id=%d is not owner of item id=%d", nonOwner.getId(), itemId);
+
+            Item unchangedItem = entityManager.find(Item.class, itemId);
+            assertThat(unchangedItem.getName()).isNotEqualTo("Updated Name");
+            assertThat(unchangedItem.getOwner().getId()).isEqualTo(owner.getId());
+        }
+
+        @Test
         @DisplayName("Should find item by id")
         void findItemById() {
             User newUser = addAndGetNewUser();
@@ -215,7 +263,6 @@ class ServiceLayerIntegrationTest {
             Item thirdItem = addAndGetNewItem(newUser.getId());
 
             List<ItemExtendedDto> foundItems = itemService.findByOwnerId(newUser.getId());
-            List<Item> allItems = getAllItems();
 
             assertThat(foundItems)
                     .hasSize(3)
@@ -272,7 +319,7 @@ class ServiceLayerIntegrationTest {
 
         @Test
         @DisplayName("Should throw exception when user hasn't booked the item")
-        void createComment_UserWithoutBookings_ShouldThrowOwnershipException() {
+        void createCommentUserWithoutBookings() {
             User itemOwner = addAndGetNewUser();
             Item item = addAndGetNewItem(itemOwner.getId());
             User nonBooker = addAndGetNewUser();
@@ -287,7 +334,7 @@ class ServiceLayerIntegrationTest {
 
         @Test
         @DisplayName("Should throw exception when booking ended less than 3 hours ago")
-        void createComment_BookingJustFinished_ShouldThrowUnavailableException() {
+        void createCommentBookingJustFinished() {
             User itemOwner = addAndGetNewUser();
             Item item = addAndGetNewItem(itemOwner.getId());
             User booker = addAndGetNewUser();
@@ -373,7 +420,7 @@ class ServiceLayerIntegrationTest {
 
         @Test
         @DisplayName("Should throw UnavailableException when owner tries to book own item")
-        void createBooking_ownItem_shouldThrowException() {
+        void createBookingOwnItem() {
             User owner = addAndGetNewUser();
             Item item = addAndGetNewItem(owner.getId());
 
