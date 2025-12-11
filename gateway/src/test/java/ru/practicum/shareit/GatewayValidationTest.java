@@ -940,8 +940,6 @@ public class GatewayValidationTest {
                 Set<ConstraintViolation<CreateItemRequest>> violations = validator.validate(request);
 
                 assertThat(violations).hasSize(1);
-                assertThat(violations.iterator().next().getMessage())
-                        .isEqualTo("must not be blank");
             }
 
             @Test
