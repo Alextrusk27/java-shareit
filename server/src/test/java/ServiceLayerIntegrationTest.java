@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
@@ -160,6 +161,21 @@ class ServiceLayerIntegrationTest {
         }
 
         @Test
+        @DisplayName("Should link item to existing ItemRequest when requestId is provided")
+        void createItem_WithRequestId_ShouldLinkToItemRequest() {
+            User owner = addAndGetNewUser();
+            ItemRequest itemRequest = addAndGetNewItemRequest(owner.getId());
+            CreateItem createRequest = new CreateItem("Item name", "Item description", true, itemRequest.getId());
+
+            itemService.create(createRequest, owner.getId());
+
+            Item savedItem = getAllItems().getFirst();
+            assertThat(savedItem.getItemRequests())
+                    .hasSize(1)
+                    .containsExactly(itemRequest);
+        }
+
+        @Test
         @DisplayName("Should update existing item with valid fields")
         void updateExistingItem() {
             User newUser = addAndGetNewUser();
@@ -252,6 +268,42 @@ class ServiceLayerIntegrationTest {
             assertThat(foundedComment.getItem().getId()).isEqualTo(item.getId());
             assertThat(foundedComment.getAuthor().getId()).isEqualTo(booker.getId());
             assertThat(foundedComment.getCreated()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Should throw exception when user hasn't booked the item")
+        void createComment_UserWithoutBookings_ShouldThrowOwnershipException() {
+            User itemOwner = addAndGetNewUser();
+            Item item = addAndGetNewItem(itemOwner.getId());
+            User nonBooker = addAndGetNewUser();
+            CreateComment createRequest = new CreateComment("Test comment");
+
+            assertThatThrownBy(() ->
+                    itemService.createComment(createRequest, item.getId(), nonBooker.getId())
+            )
+                    .isInstanceOf(OwnershipException.class)
+                    .hasMessageContaining("User id=%d hasn't approved bookings for this item".formatted(nonBooker.getId()));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when booking ended less than 3 hours ago")
+        void createComment_BookingJustFinished_ShouldThrowUnavailableException() {
+            User itemOwner = addAndGetNewUser();
+            Item item = addAndGetNewItem(itemOwner.getId());
+            User booker = addAndGetNewUser();
+
+            LocalDateTime start = LocalDateTime.now().minusHours(2);
+            LocalDateTime end = LocalDateTime.now().plusDays(2);
+            Booking booking = addAndGetNewBooking(item.getId(), start, end, booker.getId());
+            bookingService.updateBookingStatus(booking.getId(), true, itemOwner.getId());
+
+            CreateComment createRequest = new CreateComment("Test comment");
+
+            assertThatThrownBy(() ->
+                    itemService.createComment(createRequest, item.getId(), booker.getId())
+            )
+                    .isInstanceOf(UnavailableException.class)
+                    .hasMessageContaining("Booking doesn't finish yet");
         }
     }
 
