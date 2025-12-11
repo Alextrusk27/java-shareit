@@ -841,7 +841,5 @@ class ShareItRestApiTest {
 
             verify(itemRequestService).getById(eq(requestId));
         }
-
-
     }
 }
