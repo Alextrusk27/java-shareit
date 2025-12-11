@@ -1,6 +1,10 @@
 package ru.practicum.shareit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("JSON DTO Tests")
 public class GatewayDtoJsonTest {
 
+    private ObjectMapper mapper;
+
+    @BeforeEach
+    void setUp() {
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+    }
+
     @Nested
     @DisplayName("Users DTO")
     class UserDtoTests {
@@ -51,12 +63,10 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("User -> deserialize JSON to CreateUserRequest")
             void deserializeJsonToCreateUserRequest() throws IOException {
-                String json = """
-                        {
-                            "name": "John",
-                            "email": "john@example.com"
-                        }
-                        """;
+                ObjectNode jsonNode = mapper.createObjectNode();
+                jsonNode.put("name", "John");
+                jsonNode.put("email", "john@example.com");
+                String json = mapper.writeValueAsString(jsonNode);
                 CreateUserRequest request = createUserJson.parse(json).getObject();
 
                 assertThat(request.name()).isEqualTo("John");
@@ -83,12 +93,11 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("User -> deserialize JSON to UpdateUserRequest")
             void deserializeJsonToUpdateUserRequest() throws IOException {
-                String json = """
-                        {
-                            "name": "John Updated",
-                            "email": "john.updated@example.com"
-                        }
-                        """;
+                ObjectNode jsonNode = mapper.createObjectNode();
+                jsonNode.put("name", "John Updated");
+                jsonNode.put("email", "john.updated@example.com");
+                String json = mapper.writeValueAsString(jsonNode);
+
                 UpdateUserRequest request = updateUserJson.parse(json).getObject();
 
                 assertThat(request.name()).isEqualTo("John Updated");
@@ -122,14 +131,12 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("Item -> deserialize JSON to CreateItem")
             void deserializeJsonToCreateItem() throws IOException {
-                String json = """
-                        {
-                            "name": "Hammer",
-                            "description": "Heavy duty hammer",
-                            "available": false,
-                            "requestId": 456
-                        }
-                        """;
+                ObjectNode itemJsonNode = mapper.createObjectNode();
+                itemJsonNode.put("name", "Hammer");
+                itemJsonNode.put("description", "Heavy duty hammer");
+                itemJsonNode.put("available", false);
+                itemJsonNode.put("requestId", 456);
+                String json = mapper.writeValueAsString(itemJsonNode);
                 CreateItem request = createItemJson.parse(json).getObject();
 
                 assertThat(request.name()).isEqualTo("Hammer");
@@ -159,13 +166,11 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("Item -> deserialize JSON to UpdateItem")
             void deserializeJsonToUpdateItem() throws IOException {
-                String json = """
-                {
-                    "name": "Updated Hammer",
-                    "description": "Lighter and more efficient",
-                    "available": true
-                }
-                """;
+                ObjectNode jsonNode = mapper.createObjectNode();
+                jsonNode.put("name", "Updated Hammer");
+                jsonNode.put("description", "Lighter and more efficient");
+                jsonNode.put("available", true);
+                String json = mapper.writeValueAsString(jsonNode);
                 UpdateItem request = updateItemJson.parse(json).getObject();
 
                 assertThat(request.name()).isEqualTo("Updated Hammer");
@@ -192,11 +197,9 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("Comment -> deserialize JSON to CreateComment")
             void deserializeJsonToCreateComment() throws IOException {
-                String json = """
-                {
-                    "text": "Very useful tool, thank you!"
-                }
-                """;
+                ObjectNode jsonNode = mapper.createObjectNode();
+                jsonNode.put("text", "Very useful tool, thank you!");
+                String json = mapper.writeValueAsString(jsonNode);
                 CreateComment request = createCommentJson.parse(json).getObject();
 
                 assertThat(request.text()).isEqualTo("Very useful tool, thank you!");
@@ -231,13 +234,11 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("Booking -> deserialize JSON to CreateBookingRequest")
             void deserializeJsonToCreateBookingRequest() throws IOException {
-                String json = """
-                {
-                    "itemId": 456,
-                    "start": "2024-01-15T10:00:00",
-                    "end": "2024-01-20T10:00:00"
-                }
-                """;
+                ObjectNode jsonNode = mapper.createObjectNode();
+                jsonNode.put("itemId", 456);
+                jsonNode.put("start", "2024-01-15T10:00:00");
+                jsonNode.put("end", "2024-01-20T10:00:00");
+                String json = mapper.writeValueAsString(jsonNode);
                 CreateBookingRequest request = createBookingJson.parse(json).getObject();
 
                 assertThat(request.itemId()).isEqualTo(456L);
@@ -270,11 +271,9 @@ public class GatewayDtoJsonTest {
             @Test
             @DisplayName("Item Request -> deserialize JSON to CreateItemRequest")
             void deserializeJsonToCreateItemRequest() throws IOException {
-                String json = """
-                {
-                    "description": "Looking for a camping tent for 4 people"
-                }
-                """;
+                ObjectNode jsonNode = mapper.createObjectNode();
+                jsonNode.put("description", "Looking for a camping tent for 4 people");
+                String json = mapper.writeValueAsString(jsonNode);
                 CreateItemRequest request = createItemRequestJson.parse(json).getObject();
 
                 assertThat(request.description()).isEqualTo("Looking for a camping tent for 4 people");
