@@ -8,17 +8,18 @@ services:
     depends_on:
       - server
     environment:
-      - SHAREIT_SERVER_URL=http://server:8080
+      - SHAREIT_SERVER_URL=http://server:9090
 
   server:
     build: server
     image: shareit-server
     container_name: shareit-server
     ports:
-      - "9090:8080"
+      - "9090:9090"
     depends_on:
       - db
     environment:
+      - SERVER_PORT=9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
       - SPRING_DATASOURCE_USERNAME=shareit
       - SPRING_DATASOURCE_PASSWORD=shareit

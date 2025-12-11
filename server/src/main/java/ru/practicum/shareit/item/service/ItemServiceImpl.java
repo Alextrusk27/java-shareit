@@ -189,7 +189,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         if (bookings.stream()
-                .noneMatch(booking -> booking.getEnd().isBefore(LocalDateTime.now().plusHours(3)))) {
+                .noneMatch(booking -> booking.getEnd().isBefore(LocalDateTime.now()))) {
             throw new UnavailableException("Booking doesn't finish yet");
         }
 
