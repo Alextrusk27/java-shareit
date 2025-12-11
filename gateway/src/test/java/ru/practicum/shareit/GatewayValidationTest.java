@@ -941,7 +941,7 @@ public class GatewayValidationTest {
 
                 assertThat(violations).hasSize(1);
                 assertThat(violations.iterator().next().getMessage())
-                        .isEqualTo("не должно быть пустым");
+                        .isEqualTo("must not be blank");
             }
 
             @Test
