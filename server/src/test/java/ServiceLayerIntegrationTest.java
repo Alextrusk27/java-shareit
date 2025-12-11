@@ -12,7 +12,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import ru.practicum.shareit.ShareItApp;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingRequest;
@@ -43,6 +42,7 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -288,7 +288,7 @@ class ServiceLayerIntegrationTest {
 
         @Test
         @DisplayName("Should throw UnavailableException when booking unavailable item")
-        void CreateBookingWithUnavailableItem() {
+        void createBookingWithUnavailableItem() {
             User owner = addAndGetNewUser();
             User booker = addAndGetNewUser();
 
@@ -458,6 +458,7 @@ class ServiceLayerIntegrationTest {
             assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.WAITING)).hasSize(2);
             assertThat(bookingService.getBookingsByOwnerId(owner.getId(), BookingState.REJECTED)).hasSize(1);
         }
+
         @Test
         @DisplayName("Should delete booking")
         void deleteBookingById() {
@@ -572,8 +573,8 @@ class ServiceLayerIntegrationTest {
 
     private User addAndGetNewUser() {
         CreateUserRequest createRequest = new CreateUserRequest(
-                RandomStringUtils.randomAlphabetic(15),
-                RandomStringUtils.randomAlphabetic(10) + "@" + RandomStringUtils.randomAlphabetic(5) + ".com");
+                generateRandomString(15),
+                generateRandomString(10) + "@" + generateRandomString(5) + ".com");
         userService.create(createRequest);
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u WHERE u.name = :name", User.class);
@@ -582,8 +583,8 @@ class ServiceLayerIntegrationTest {
 
     private Item addAndGetNewItem(long userId) {
         CreateItem createRequest = new CreateItem(
-                RandomStringUtils.randomAlphabetic(15),
-                RandomStringUtils.randomAlphabetic(50),
+                generateRandomString(15),
+                generateRandomString(50),
                 true,
                 null);
         itemService.create(createRequest, userId);
@@ -603,7 +604,7 @@ class ServiceLayerIntegrationTest {
     }
 
     private ItemRequest addAndGetNewItemRequest(long userId) {
-        CreateItemRequest createRequest = new CreateItemRequest(RandomStringUtils.randomAlphabetic(40));
+        CreateItemRequest createRequest = new CreateItemRequest(generateRandomString(40));
         itemRequestService.create(userId, createRequest);
         TypedQuery<ItemRequest> query = entityManager.createQuery(
                 "SELECT ir FROM ItemRequest ir WHERE ir.description = :description", ItemRequest.class);
@@ -618,5 +619,15 @@ class ServiceLayerIntegrationTest {
     private List<Item> getAllItems() {
         TypedQuery<Item> query = entityManager.createQuery("SELECT i FROM Item i", Item.class);
         return query.getResultList();
+    }
+
+    private String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return sb.toString();
     }
 }
